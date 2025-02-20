@@ -1,7 +1,10 @@
 ---
 title: "Computational Musicology"
-output: html_document
 date: "2025-02-12"
+output: 
+  flexdashboard::flex_dashboard:
+    storyboard: true
+    theme: readable
 ---
 
 ```{r setup, include=FALSE}
