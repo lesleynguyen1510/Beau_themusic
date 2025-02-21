@@ -112,11 +112,11 @@ My tracks are scattered across different features, showing varying degrees of si
 ### Key Takeaways
 Based on the distribution of my tracks compared to the class corpus, the key insights are:
 
-- My tracks are not drastically different in features like danceability and arousal, meaning they share common rhythmic and energetic characteristics with the class corpus
+- My tracks are not drastically different in features like *danceability* and *arousal*, meaning they share common rhythmic and energetic characteristics with the class corpus
 
-- While my tracks generally follow the overall trends in most features, their placement in instrumentalness and approachability suggests a distinct musical approach, likely incorporating many traditional instruments with simpler harmonies and familiar structures to enhance accessibility for a diverse audience
+- While my tracks generally follow the overall trends in most features, their placement in *instrumentalness* and *approachability* suggests a distinct musical approach, likely incorporating many traditional instruments with simpler harmonies and familiar structures to enhance accessibility for a diverse audience
 
-- Tempo also show the unique outliner with some tracks leaning towards fast-paced compositions, while others adopt a slower, more relaxed pacing
+- *Tempo* also show the uniqueness with a track leaning towards fast-paced compositions, while other adopt a slower, more relaxed pacing
 
 This visualization provides a clear comparison of how my tracks align with the broader dataset and which features distinguish them. It confirms that Essentia effectively identifies track characteristics and highlights both similarities and unique elements of my track.
 
