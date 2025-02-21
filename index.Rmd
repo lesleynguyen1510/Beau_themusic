@@ -1,35 +1,124 @@
 ---
-title: "Computational musicology"
+title: "Computational Musicology 2025 Portfolio"
 output: 
   flexdashboard::flex_dashboard:
+    orientation: columns
+    vertical_layout: fill
     storyboard: true
-    theme: readable
+    theme: paper
 ---
 
 ```{r setup, include=FALSE}
 library(flexdashboard)
+library(tidyverse)
+library(ggplot2)
+library(plotly)
+
+compmus2025 <- read.csv("compmus2025.csv", header = TRUE, sep = ",")
+
+compmus2025 %>%
+  summarise(
+    mean_approachability = mean(approachability),
+    mean_arousal = mean(arousal), 
+    mean_danceability = mean(danceability), 
+    mean_engagingness = mean(engagingness),
+    mean_instrumentalness = mean(instrumentalness),
+    mean_tempo = mean(tempo),
+    mean_valence = mean(valence)
+  )
 ```
 
-Computational Musicology 2025 Portfolio {data-width=650}
------------------------------------------------------------------------
 
-### Introduction
-Hi there
+### Music in Advertising Videos and The Study about Vietnamese music
+
+[A study by two researchers from Hungary](https://www.emerald.com/insight/content/doi/10.1108/cbth-11-2021-0265/full/html), Monica Coronel and Anna Irimiás, confirms that music plays an essential supporting role in “destination promotional videos” and “tourism marketing,” stimulating both cognitive and affective responses. Specifically, their research reveals that background music can capture attention, reflect a destination’s characteristics, target specific audiences, highlight cultural identity, elicit emotions, and create ambience.
+
+These findings about the importance of music in tourism marketing led me to explore Vietnamese advertising music and compare it with global music trends. In particular, my research question focuses on:
+
+**“How does the musical style of Vietnamese advertising music compare to other music? Does it have distinct characteristics, or does it align with broader global trends?”**
+
+To represent Vietnamese advertising music, I selected two tracks suitable for advertising videos showcasing Vietnamese culture and nature. After experimenting with generative AI tools, I opted for royalty-free tracks from Pixabay and SoundCloud. I used keywords such as *“Vietnam,” “folk instruments,” “adventurous music,”* and *“travel”* on both platforms, and filtered for *“bright”* mood and *“cinematic music”* theme on Pixabay. I chose these tracks because they feature Vietnamese folk instruments—a key focus—and include a strong bass that enhances engagement and evokes emotions in listeners, aligning well with the commercial and storytelling purposes of advertising videos.
+
+
+### Overview of Class Corpus and Lesley's Track
 
 ```{r}
+compmus2025_numeric_original <- compmus2025 %>% select(where(is.numeric))
 
+compmus2025_numeric_scaled <- as.data.frame(scale(compmus2025_numeric_original))
+
+compmus2025_final <- cbind(compmus2025["filename"], compmus2025_numeric_scaled)
+
+compmus2025_long <- pivot_longer(
+  compmus2025_final, 
+  cols = -filename, 
+  names_to = "Feature", 
+  values_to = "Value"
+  )
+
+compmus2025_original_long <- pivot_longer(
+  cbind(compmus2025["filename"], compmus2025_numeric_original), 
+  cols = -filename, names_to = "Feature", values_to = "RealValue"
+  )
+
+compmus2025_long <- left_join(
+  compmus2025_long, 
+  compmus2025_original_long, 
+  by = c("filename", "Feature")
+  )
+
+compmus2025_long <- compmus2025_long %>%
+  mutate(is_lesley = ifelse(grepl("lesley", filename, ignore.case = TRUE), "Lesley", "Other"))
+
+# Plot
+p <- ggplot(compmus2025_long, aes(x = Feature, y = Value)) +
+  geom_boxplot(fill = "skyblue", color = "darkblue", outlier.shape = NA) + 
+  geom_jitter(data = compmus2025_long %>% filter(is_lesley == "Other"), 
+              aes(x = Feature, y = Value, text = paste(
+                "Filename:", filename, 
+                "<br>Feature:", Feature, 
+                "<br>Real Value:", round(RealValue, 3)
+              )),
+              color = "black", width = 0.2, alpha = 0.4, size = 1.5) +  
+  geom_jitter(data = compmus2025_long %>% filter(is_lesley == "Lesley"), 
+              aes(x = Feature, y = Value, text = paste(
+                "LESLEY",
+                "<br>Filename:", filename, 
+                "<br>Feature:", Feature, 
+                "<br>Real Value:", round(RealValue, 3)
+              )),
+              color = "deeppink", width = 0.2, alpha = 10, size = 4) +  
+  theme_minimal() +
+  labs(x = "Essentia Features",
+       y = "Normalized Value") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+plotly_plot <- ggplotly(p, tooltip = "text")
+plotly_plot <- style(plotly_plot, hoverinfo = "skip", traces = 1)
+plotly_plot
 ```
 
+***
+This interactive boxplot presents the distribution of various Essentia features extracted from the class corpus. The <span style="color:black"><b>black</b></span> points represent all tracks in the dataset, while my tracks are highlighted in <span style="color:deeppink"><b>pink</b></span> for better visibility.
 
-### Visualization
+My tracks are scattered across different features, showing varying degrees of similarity and uniqueness compared to the "average" track in the corpus:
 
-```{r}
+- **Arousal, Danceability, Engagingness and Valence**: My tracks tend to be closer to the median or remain within the general range of the corpus, suggesting they align with the typical characteristics of the class corpus
 
-```
+- **Approachability & Instrumentalness**: My two tracks are both positioned higher than the median, or  toward the higher end of the distribution, indicating they are significantly different from the majority of tracks
 
-### Conclusion
+- **Tempo**: My tracks are distributed outside the interquartile range (IQR) with the intension to lean toward either the upper or lower quartile, showing that they deviate significantly from the majority of the class corpus with the higher-than-average or lower-than-average speeds
 
-```{r}
 
-```
+### Key Takeaways
+Based on the distribution of my tracks compared to the class corpus, the key insights are:
+
+- My tracks are not drastically different in features like danceability and arousal, meaning they share common rhythmic and energetic characteristics with the class corpus
+
+- While my tracks generally follow the overall trends in most features, their placement in instrumentalness and approachability suggests a distinct musical approach, likely incorporating many traditional instruments with simpler harmonies and familiar structures to enhance accessibility for a diverse audience
+
+- Tempo also show the unique outliner with some tracks leaning towards fast-paced compositions, while others adopt a slower, more relaxed pacing
+
+This visualization provides a clear comparison of how my tracks align with the broader dataset and which features distinguish them. It confirms that Essentia effectively identifies track characteristics and highlights both similarities and unique elements of my track.
+
+
 
