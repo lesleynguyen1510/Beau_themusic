@@ -1,2 +1,2 @@
 # Beau_themusic
-This is my project from ***Musicology Computational*** Course taken during my exchange in **University of Amsterdam**
+This is my project from ***Musicology Computational*** Course taken during my exchange in **University of Amsterdam**. You can watch my portfolio in this link https://lesleynguyen1510.github.io/Beau_themusic/
