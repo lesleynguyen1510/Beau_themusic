@@ -13,6 +13,8 @@ library(flexdashboard)
 library(tidyverse)
 library(ggplot2)
 library(plotly)
+source("compmus.R")
+library(patchwork)
 
 compmus2025 <- read.csv("compmus2025.csv", header = TRUE, sep = ",")
 
@@ -28,6 +30,84 @@ compmus2025 %>%
   )
 ```
 
+### Chromagram
+``` {r}
+"features/lesley-n-1.json" |>
+  compmus_chroma(norm = "euclidean") |>             
+  ggplot(aes(x = time, y = pc, fill = value)) + 
+  geom_raster() +
+  scale_y_continuous(
+    breaks = 0:11,
+    minor_breaks = NULL,
+    labels = c(
+                "C", "C#|Db", "D", "D#|Eb",
+                "E", "F", "F#|Gb", "G",
+                "G#|Ab", "A", "A#|Bb", "B"
+              )
+  ) +
+  scale_fill_viridis_c(guide = "none") +
+  labs(x = "Time (s)", 
+       y = NULL, 
+       fill = NULL) +
+  theme_minimal()
+
+```
+
+***
+The first chromagram reveals a dynamically structured piece that doesn’t settle on a single tonal center but rather employs a wide array of pitch classes throughout its duration
+
+- **Broad Pitch Utilization**: The entire 12-tone pitch spectrum is active throughout the piece. Bright bands appear across nearly all pitch classes, indicating that the composition does not fixate on one key but instead incorporates chromatic elements or frequent modulations
+
+- **Recurring Clusters**: Noticeable clusters of intense activity at specific time intervals suggest repeated melodic or harmonic motifs, hinting at the use of recurring chord progressions or thematic material
+
+### Chroma-based and Timbre-based Self-similarity Matrices
+``` {r}
+p_chroma <- "features/lesley-n-1.json" |>                           
+  compmus_chroma(norm = "manhattan") |>                   
+  compmus_self_similarity(
+    feature = pc, 
+    distance = "aitchison"
+  ) |>   
+  ggplot(aes(x = xtime, y = ytime, fill = d)) + 
+  geom_raster() +
+  scale_fill_viridis_c(guide = "none") +             
+  labs(title = "Chroma",
+       x = "Time (s)", y = NULL, fill = NULL) +
+  theme_minimal(base_size = 14) +
+  coord_fixed()
+
+p_timbre <- "features/lesley-n-1.json" |>             
+  compmus_mfccs(norm = "chebyshev") |>  
+  compmus_self_similarity(
+    feature = mfcc
+  ) |>   
+  ggplot(aes(x = xtime, y = ytime, fill = d)) + 
+  geom_raster() +
+  scale_fill_viridis_c(guide = "none") +
+  labs( title = "Timbre", 
+        x = "Time (s)", y = NULL, fill = NULL) +
+  theme_minimal(base_size = 14) +
+  coord_fixed()
+
+ p_chroma + p_timbre
+```
+
+*** 
+**Chroma-based Self-Similarity Matrix**
+
+The block-like structures and distinct lines are more apparent, indicating sections of the track where harmonic repetition homogeneity occurs:
+
+- Block-like structures: These represent homogeneous musical sections such as verses or choruses
+
+- Distinct, sometimes blurred, paths parallel to the main diagonal: These indicate repeated sections occurring at regular time intervals, even if the patterns aren’t perfectly sharp
+
+**Timbre-based Self-Similarity Matrix**
+
+The block-like structures are less clear. Instead, the streaks are more blurred and evenly distributed, suggesting that there is variability in timbre throughout the track
+
+- The absence of distinct parallel diagonal lines may indicate that the track experiences significant changes in instrumentation or arrangement between different sections
+
+- Bright areas appearing along the edges and center might represent sections where there are changes in instrumentation or performance style, such as a drop or a solo instrumental segment
 
 ### Music in Advertising Videos and The Study about Vietnamese music
 
@@ -119,6 +199,4 @@ Based on the distribution of my tracks compared to the class corpus, the key ins
 - *Tempo* also show the uniqueness with a track leaning towards fast-paced compositions, while other adopt a slower, more relaxed pacing
 
 This visualization provides a clear comparison of how my tracks align with the broader dataset and which features distinguish them. It confirms that Essentia effectively identifies track characteristics and highlights both similarities and unique elements of my track.
-
-
 
