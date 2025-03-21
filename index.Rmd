@@ -5,7 +5,7 @@ output:
     orientation: columns
     vertical_layout: fill
     storyboard: true
-    theme: paper
+    theme: paper 
 ---
 
 ```{r setup, include=FALSE}
@@ -196,6 +196,7 @@ p_tempo_hist <- ggplot(compmus2025_tempo, aes(x = tempo)) +
 
 p_tempo_hist
 ```
+
 
 ### Music in Advertising Videos and The Study about Vietnamese music
 
