@@ -54,9 +54,7 @@ get_pr <- function(fit) {
 ```
 
 
-
 ### Hierarchical clustering
-
 ```{r}
 cluster_juice <-
   recipe(
