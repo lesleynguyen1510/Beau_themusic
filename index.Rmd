@@ -1,4 +1,4 @@
----
+----
 title: "Computational Musicology 2025 Portfolio"
 output: 
   flexdashboard::flex_dashboard:
@@ -16,6 +16,10 @@ source("compmus.R")
 library(patchwork)
 library(signal)
 library(tidyverse)
+library(tidymodels)
+library(ggdendro)
+library(heatmaply)
+library(kknn)
 
 compmus2025 <- read.csv("compmus2025.csv", header = TRUE, sep = ",")
 
@@ -29,7 +33,152 @@ compmus2025 %>%
     mean_tempo = mean(tempo),
     mean_valence = mean(valence)
   )
+
+source("compmus.R")
+
+get_conf_mat <- function(fit) {
+  outcome <- .get_tune_outcome_names(fit)
+  fit |> 
+    collect_predictions() |> 
+    conf_mat(truth = outcome, estimate = .pred_class)
+}  
+
+get_pr <- function(fit) {
+  fit |> 
+    conf_mat_resampled() |> 
+    group_by(Prediction) |> mutate(precision = Freq / sum(Freq)) |> 
+    group_by(Truth) |> mutate(recall = Freq / sum(Freq)) |> 
+    ungroup() |> filter(Prediction == Truth) |> 
+    select(class = Prediction, precision, recall)
+}  
 ```
+
+
+
+### Hierarchical clustering
+
+```{r}
+cluster_juice <-
+  recipe(
+    filename ~
+      approachability + 
+      arousal +
+      danceability +
+      instrumentalness +
+      engagingness +
+      tempo +
+      valence,
+    data = compmus2025
+  ) |>
+  step_center(all_predictors()) |>
+  step_scale(all_predictors()) |> 
+  # step_range(all_predictors()) |> 
+  prep(compmus2025) |>
+  juice() |>
+  column_to_rownames("filename")
+
+compmus_dist <- dist(cluster_juice, method = "euclidean")
+
+compmus_dist |> 
+  hclust(method = "average") |> # Try single, average, and complete.
+  dendro_data() |>
+  ggdendrogram() +
+  labs(title = "Dendrogram with All Features") + 
+  theme(plot.title = element_text(face = "bold"))
+
+cluster_juice1 <-
+  recipe(
+    filename ~ arousal +
+      instrumentalness +
+      tempo,
+    data = compmus2025
+  ) |>
+  step_center(all_predictors()) |>
+  step_scale(all_predictors()) |> 
+  # step_range(all_predictors()) |> 
+  prep(compmus2025) |>
+  juice() |>
+  column_to_rownames("filename")
+
+compmus_dist <- dist(cluster_juice1, method = "euclidean")
+
+compmus_dist |> 
+  hclust(method = "average") |> # Try single, average, and complete.
+  dendro_data() |>
+  ggdendrogram() +
+  labs(title = "Dendrogram with Arousal, Instrumentalness, and Tempo") + 
+  theme(plot.title = element_text(face = "bold"))
+```
+
+*** 
+When using all the Essentia features, the dendrogram tends to be skewed and asymmetrical, with most of the branches clustering towards the left side. This suggests that the data is concentrated in a specific area, making it harder to assess the similarity between tracks. The resulting over-clustering can make it difficult to interpret the relationships between tracks effectively. 
+
+When filtering down to just the features arousal, instrumentalness, and tempo, the dendrogram becomes more symmetrical and clearer. With fewer and more relevant features, the clusters in the dendrogram appear more distinct and balanced, making it easier to differentiate between tracks that share stronger similarities. This reduced complexity allows for a clearer visualization of the data, which aligns better with the perceived musical traits of the tracks
+
+Despite initially perceiving that the two tracks I focused sounded quite similar, the dendrogram shows that they are, in fact, quite distant from each other. The first track is positioned on the far left of the dendrogram, grouped closely with tracks like ties-o-2 and wednesday-w-2. In contrast, the second track is placed more towards the right, clustering with tracks like daniel-p-2 and sarya-h-2. 
+
+### Heatmap
+
+```{r}
+heatmaply(
+  cluster_juice1,
+  hclustfun = hclust,
+  hclust_method = "average",  # Change for single, average, or complete linkage.
+  dist_method = "euclidean"
+)
+```
+
+*** 
+Track 1
+
+When listening to ties-o-2 and wednesday-w-2, and comparing them to my first track, I initially noticed very little similarity, if not none at all. However, the heatmap reveals that these three tracks share relatively similar values in instrumentalness. Surprisingly, all three have negative values, which I didn’t expect, particularly for my own track. Despite hearing many instrumental sounds, including Vietnamese zither, drums, and other traditional instruments combined throughout the song, the system does not seem to highlight these aspects. This raises concerns about whether non-Western traditional instruments can be effectively captured and represented by the system.
+
+Track 2
+
+When comparing daniel-p-2 and sarya-h-2 with my second track, I recognize a similarity in their tempo, as all three tracks have a relatively slow tempo. Additionally, their song structures are quite simple, which I believe explains why their arousal and tempo values are closely grouped together in the heatmap.
+
+Track 1+2
+
+I am still quite concerned about the system's ability to accurately extract instrumentalness, as my first track has a negative value, while the second track has a positive one. However, upon listening to both tracks, I noticed that while the second track features flute sounds, it seems to predominantly contain electronic sound effects, unlike track 1, which is more focused on the combination of various traditional instruments. This discrepancy raises questions about how the system differentiates between non-Western traditional instruments and electronic sounds, and whether it can fully capture the nuanced instrumental features present in each track.
+
+
+### Classifying
+```{r}
+compmus2025_filtered <- 
+  compmus2025 |> filter(!is.na(ai)) |> 
+  mutate(ai = factor(if_else(ai, "AI", "Non-AI")))
+
+classification_recipe <-
+  recipe(
+    ai ~
+      instrumentalness + danceability + tempo,
+    data = compmus2025_filtered
+  ) |>
+  step_center(all_predictors()) |>
+  step_scale(all_predictors())      # Converts to z-scores.
+  # step_range(all_predictors())    # Sets range to [0, 1].
+
+compmus_cv <- compmus2025_filtered |> vfold_cv(5)
+
+knn_model <-
+  nearest_neighbor(neighbors = 1) |>
+  set_mode("classification") |> 
+  set_engine("kknn")
+classification_knn <- 
+  workflow() |> 
+  add_recipe(classification_recipe) |> 
+  add_model(knn_model) |> 
+  fit_resamples(compmus_cv, control = control_resamples(save_pred = TRUE))
+
+classification_knn |> get_conf_mat()
+
+classification_knn |> get_conf_mat() |> autoplot(type = "mosaic")
+
+classification_knn |> get_conf_mat() |> autoplot(type = "heatmap")
+```
+
+*** 
+The mosaic on the left illustrates the performance of a classifier attempting to distinguish between AI-generated and non-AI-generated tracks. Using k-Nearest Neighbour classifier, the most important features for classifying tracks are: instrumentalness + danceability + tempo. These features give the highest scores for AI-AI (prediction-truth) and non-AI - non-AI (prediction-truth), among the various feature combinations tested. This suggests that these features could be crucial and valuable for identifying whether a track is generated by AI or not.
 
 
 ### Histogram of class corpus's tempo
@@ -50,112 +199,6 @@ p_tempo_hist <- ggplot(compmus2025_tempo, aes(x = tempo)) +
 p_tempo_hist
 ```
 
-### Tempograms
-```{r, tempogram-plots}
-
-my_tempogram_theme <- theme(
-  plot.title = element_text(size = 14, face = "bold"),     
-  plot.subtitle = element_text(size = 12),  
-  axis.title = element_text(size = 10),     
-  axis.text = element_text(size = 8)      
-)
-
-"features/lesley-n-1.json" |>
-  compmus_tempogram(window_size = 8, hop_size = 1, cyclic = FALSE) |>
-  ggplot(aes(x = time, y = bpm, fill = power)) +
-  geom_raster() +
-  scale_fill_viridis_c(guide = "none") +
-  labs(
-    title = "Fourier-based tempogram (non-cyclic)",
-    subtitle = "Track 1", 
-    x = "Time (s)", 
-    y = "Tempo (BPM)"
-  ) +
-  theme_classic() +
-  my_tempogram_theme
-
-"features/lesley-n-1.json" |>
-  compmus_tempogram(window_size = 8, hop_size = 1, cyclic = TRUE) |>
-  ggplot(aes(x = time, y = bpm, fill = power)) +
-  geom_raster() +
-  scale_fill_viridis_c(guide = "none") +
-  labs(
-    title = "Cyclic tempogram",
-    subtitle = "Track 1",
-    x = "Time (s)",
-    y = "Tempo (BPM)"
-  ) +
-  theme_classic() +
-  my_tempogram_theme
-
-"features/lesley-n-2.json" |>
-  compmus_tempogram(window_size = 8, hop_size = 1, cyclic = FALSE) |>
-  ggplot(aes(x = time, y = bpm, fill = power)) +
-  geom_raster() +
-  scale_fill_viridis_c(guide = "none") +
-  labs(
-    title = "Fourier-based tempogram (non-cyclic)",
-    subtitle = "Track 2", 
-    x = "Time (s)", 
-    y = "Tempo (BPM)"
-  ) +
-  theme_classic() +
-  my_tempogram_theme
-
-"features/lesley-n-2.json" |>
-  compmus_tempogram(window_size = 8, hop_size = 1, cyclic = TRUE) |>
-  ggplot(aes(x = time, y = bpm, fill = power)) +
-  geom_raster() +
-  scale_fill_viridis_c(guide = "none") +
-  labs(
-    title = "Cyclic tempogram",
-    subtitle = "Track 2", 
-    x = "Time (s)", 
-    y = "Tempo (BPM)"
-  ) +
-  theme_classic() +
-  my_tempogram_theme
-
-```
-
-***
-**Track 1**
-
-**- Fourier-based tempogram:**
-
-+ Prominent, stable horizontal lines appear consistently at multiple tempo levels (~120 BPM, 240 BPM, 360 BPM, etc.), clearly indicating a fundamental tempo around 120 BPM, with additional lines representing tempo octaves 
-
-+ The rhythmic structure is highly repetitive and steady, reflecting a clear rhythmic pattern throughout the duration of the track
-
-+ Minimal tempo variation occurs, with slight exceptions at the opening (0–5s) and the ending section (around 190s onward), implying strong rhythmic stability. I guess that these variations subtly highlight a structured musical form, including an introduction, main body, and conclusion 
-
-**- Cyclic tempogram:** A simplified visualization by wrapping higher harmonics back into the fundamental range
-
-+ Clearly highlights a stable fundamental tempo around 118 BPM (near 120 BPM as estimated in non-cyclic tempogram)
-
-+ Noticeable gradual tempo modulations occur, with the tempo starting slower (approximately 90 BPM) and gradually increasing at the beginning, and slightly decreasing towards the end (around 115 BPM)
-
-
-**Track 2**
-
-**- Fourier-based tempogram:**
-
-+ Presents similarly strong, stable horizontal lines but around multiple tempo levels (~100 BPM, 200 BPM, 300 BPM, etc.)
-
-+ However, unlike Track 1, this track shows short and subtle rhythmic interruptions around certain moments (around 5s, 40s, 110s, 140s, etc)
-
-**- Cyclic tempogram:**
-
-+ Clearly isolates the main fundamental tempo around 100 BPM
-
-+ Clearer reveal rhythmic variations (seen as vertical lighter lines at multiple time-points) which suggests beat strength's changes and presents brief musical transitions aligning with what is found when listening the track
-
--> Based solely on the tempogram analysis of these tracks, Vietnamese advertising background music appears characterized by clear, stable fundamental tempo structures, often accompanied by identifiable harmonic patterns. The rhythmic consistency observed suggests suitability for creating comfortable listening experiences while viewing nature and culture presented in video, essential in promotional contexts. While there are still visible 
-changes presented in tempograms at certain time-points, these are not such huge changes and these changes seem to be mainly due to the changes in instrumentation when carefully listening to the tracks
-
-(I still don't know how to change the code in order to make all graphs have the same size, if you know, please help meeee! thank you in advance!)
-
-
 ### Music in Advertising Videos and The Study about Vietnamese music
 
 [A study by two researchers from Hungary](https://www.emerald.com/insight/content/doi/10.1108/cbth-11-2021-0265/full/html), Monica Coronel and Anna Irimiás, confirms that music plays an essential supporting role in “destination promotional videos” and “tourism marketing,” stimulating both cognitive and affective responses. Specifically, their research reveals that background music can capture attention, reflect a destination’s characteristics, target specific audiences, highlight cultural identity, elicit emotions, and create ambience.
@@ -165,6 +208,8 @@ These findings about the importance of music in tourism marketing led me to expl
 **“How does the musical style of Vietnamese advertising music compare to other music? Does it have distinct characteristics, or does it align with broader global trends?”**
 
 To represent Vietnamese advertising music, I selected two tracks suitable for advertising videos showcasing Vietnamese culture and nature. After experimenting with generative AI tools, I opted for royalty-free tracks from Pixabay and SoundCloud. I used keywords such as *“Vietnam,” “folk instruments,” “adventurous music,”* and *“travel”* on both platforms, and filtered for *“bright”* mood and *“cinematic music”* theme on Pixabay. I chose these tracks because they feature Vietnamese folk instruments—a key focus—and include a strong bass that enhances engagement and evokes emotions in listeners, aligning well with the commercial and storytelling purposes of advertising videos.
+
+To support and contextualize the comparisons with other "global music trends", I will analyze Vietnamese advertising music alongside three Western music styles observed in the class corpus: rock (lennart-p-2), blue jazz (gijs-s-2), and traditional jazz (jasper-v-1). These genres provide contrasting perspectives on harmony, loudness dynamics, timbre, and rhythmic structure, allowing me to assess whether Vietnamese advertising music exhibits distinctive characteristics or aligns with broader global trends.
 
 
 ### What are the overall characteristics of these two Vietnamese background music tracks in terms of Essentia features
@@ -555,3 +600,108 @@ These keygrams exhibit a more ambiguous structure, with a diverse and less clear
 
 (I plan to analyze this further in the future, as I find some aspects of it quite confusing at the moment :) )
 
+
+### Tempograms
+```{r, tempogram-plots}
+
+my_tempogram_theme <- theme(
+  plot.title = element_text(size = 14, face = "bold"),     
+  plot.subtitle = element_text(size = 12),  
+  axis.title = element_text(size = 10),     
+  axis.text = element_text(size = 8)      
+)
+
+"features/lesley-n-1.json" |>
+  compmus_tempogram(window_size = 8, hop_size = 1, cyclic = FALSE) |>
+  ggplot(aes(x = time, y = bpm, fill = power)) +
+  geom_raster() +
+  scale_fill_viridis_c(guide = "none") +
+  labs(
+    title = "Fourier-based tempogram (non-cyclic)",
+    subtitle = "Track 1", 
+    x = "Time (s)", 
+    y = "Tempo (BPM)"
+  ) +
+  theme_classic() +
+  my_tempogram_theme
+
+"features/lesley-n-1.json" |>
+  compmus_tempogram(window_size = 8, hop_size = 1, cyclic = TRUE) |>
+  ggplot(aes(x = time, y = bpm, fill = power)) +
+  geom_raster() +
+  scale_fill_viridis_c(guide = "none") +
+  labs(
+    title = "Cyclic tempogram",
+    subtitle = "Track 1",
+    x = "Time (s)",
+    y = "Tempo (BPM)"
+  ) +
+  theme_classic() +
+  my_tempogram_theme
+
+"features/lesley-n-2.json" |>
+  compmus_tempogram(window_size = 8, hop_size = 1, cyclic = FALSE) |>
+  ggplot(aes(x = time, y = bpm, fill = power)) +
+  geom_raster() +
+  scale_fill_viridis_c(guide = "none") +
+  labs(
+    title = "Fourier-based tempogram (non-cyclic)",
+    subtitle = "Track 2", 
+    x = "Time (s)", 
+    y = "Tempo (BPM)"
+  ) +
+  theme_classic() +
+  my_tempogram_theme
+
+"features/lesley-n-2.json" |>
+  compmus_tempogram(window_size = 8, hop_size = 1, cyclic = TRUE) |>
+  ggplot(aes(x = time, y = bpm, fill = power)) +
+  geom_raster() +
+  scale_fill_viridis_c(guide = "none") +
+  labs(
+    title = "Cyclic tempogram",
+    subtitle = "Track 2", 
+    x = "Time (s)", 
+    y = "Tempo (BPM)"
+  ) +
+  theme_classic() +
+  my_tempogram_theme
+
+```
+
+***
+**Track 1**
+
+**- Fourier-based tempogram:**
+
++ Prominent, stable horizontal lines appear consistently at multiple tempo levels (~120 BPM, 240 BPM, 360 BPM, etc.), clearly indicating a fundamental tempo around 120 BPM, with additional lines representing tempo octaves 
+
++ The rhythmic structure is highly repetitive and steady, reflecting a clear rhythmic pattern throughout the duration of the track
+
++ Minimal tempo variation occurs, with slight exceptions at the opening (0–5s) and the ending section (around 190s onward), implying strong rhythmic stability. I guess that these variations subtly highlight a structured musical form, including an introduction, main body, and conclusion 
+
+**- Cyclic tempogram:** A simplified visualization by wrapping higher harmonics back into the fundamental range
+
++ Clearly highlights a stable fundamental tempo around 118 BPM (near 120 BPM as estimated in non-cyclic tempogram)
+
++ Noticeable gradual tempo modulations occur, with the tempo starting slower (approximately 90 BPM) and gradually increasing at the beginning, and slightly decreasing towards the end (around 115 BPM)
+
+
+**Track 2**
+
+**- Fourier-based tempogram:**
+
++ Presents similarly strong, stable horizontal lines but around multiple tempo levels (~100 BPM, 200 BPM, 300 BPM, etc.)
+
++ However, unlike Track 1, this track shows short and subtle rhythmic interruptions around certain moments (around 5s, 40s, 110s, 140s, etc)
+
+**- Cyclic tempogram:**
+
++ Clearly isolates the main fundamental tempo around 100 BPM
+
++ Clearer reveal rhythmic variations (seen as vertical lighter lines at multiple time-points) which suggests beat strength's changes and presents brief musical transitions aligning with what is found when listening the track
+
+-> Based solely on the tempogram analysis of these tracks, Vietnamese advertising background music appears characterized by clear, stable fundamental tempo structures, often accompanied by identifiable harmonic patterns. The rhythmic consistency observed suggests suitability for creating comfortable listening experiences while viewing nature and culture presented in video, essential in promotional contexts. While there are still visible 
+changes presented in tempograms at certain time-points, these are not such huge changes and these changes seem to be mainly due to the changes in instrumentation when carefully listening to the tracks
+
+(I still don't know how to change the code in order to make all graphs have the same size, if you know, please help meeee! thank you in advance!)
