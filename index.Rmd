@@ -671,7 +671,7 @@ The cepstrogram analysis offers a deeper look into the timbral landscape of both
 
 While Track 1 maintains an overall timbral consistency in the higher coefficients (3 and above), there are noticeable changes at specific time points such as 10s, 40s, 70s, 120s, 125s, 160s and 190s. These momentary shifts suggest transient structural and instrumental events. 
 
-More notably, if we observe the lower-order coefficients — especially coefficients 0 and 1, which represent overall energy and spectral shape — we can identify distinct changes in color and intensity during 70s to 110s and again between 160s and 190s. These segments likely correspond to the use of transitional sound effects and the introduction of organ-like timbres, which slightly disturb the otherwise smooth texture. Such elements might serve to subtly signal new scenes and guide emotional flow in an advertisement, without disrupting the central tonal grounding of the track.
+More notably, when observing the lower-order coefficients — especially coefficients 0 and 1, which represent overall energy and spectral shape — there are distinct changes in color and intensity during 70s to 110s and again between 160s and 190s. These segments likely correspond to the use of transitional sound effects and the introduction of organ-like timbres, which slightly disturb the otherwise smooth texture. Such elements might serve to subtly signal new scenes and guide emotional flow in an advertisement, without disrupting the central tonal grounding of the track.
 
 
 **Track 2**
@@ -683,7 +683,7 @@ A particularly striking feature appears in coefficient 1, where a distinct and c
 
 These findings suggest that timbral variation — whether minimal and steady as in Track 1 or more dynamic and contrastive as in Track 2 — plays a crucial role in shaping the emotional pacing and storytelling function of Vietnamese advertising music.
 
-# Chroma-based and Timbre-based Self-similarity Matrices
+# Chroma and Timbre Features
 
 ## Row 1 {data-width="350"}
 
@@ -793,7 +793,7 @@ Chroma-based matrix of Track 2 reveals very clear large blocks separated by dist
 
 The timbre-based matrix shows strong block segmentation — a sign of clear instrumental and textural shifts across sections. What stands out most are the lighter horizontal and vertical lines intersecting around the center (at around 110s). These bright lines indicate a drop in self-similarity at that point, highlighting a transitional moment where timbral texture noticeably changes. This could correspond to a dramatic shift in instrumentation corresponding with a solo break of drum perceived in cepstrogram, separating two major parts of the track.
 
-# Tempograms
+# Temporal features
 
 ## Row 1 {.tabset .tabset-fade data-width="350"}
 
@@ -887,12 +887,12 @@ The timbre-based matrix shows strong block segmentation — a sign of clear inst
 
 ### Novelty Function 
 
-***Track 1***
+**Track 1**
 
 The spectral-based novelty function for Track 1 reflects a textural landscape that is smooth yet gently evolving. While there are no sharp or dramatic peaks, the function displays frequent moderate fluctuations, indicating a continuous stream of timbral and structural changes without disruption. Novelty values mostly stay under 0.20, with clusters of slightly elevated peaks around 10s, 40s, 110s–125s, and 140s. This corresponds closely with the timbral shifts and sectional transitions previously observed in the cepstrogram and timbre-based self-similarity matrix with instrumental layering, transitional sound effects. 
 
 
-***Track 2***
+**Track 2**
 
 In contrast, the spectral novelty function of Track 2 reveals a highly segmented and event-driven structure, with three clear peaks marking significant moments in the track: at the very beginning, at 110s, and near the end (around 200s). These peaks indicate sharp spectral changes, often associated with transitions between major sections or the introduction of contrasting timbral material. The initial peak corresponds with the entrance of strong percussion, setting the tone and energy for the opening of piece. The central peak at 110s aligns with the solo drum break observed in both the cepstrogram and self-similarity matrices, which serves as a structural turning point that divides the track into two contrasting halves. Finally, the late peak around 200s marks a final transition, closing the piece with a shift in musical direction. 
 
@@ -901,18 +901,18 @@ Overall, Vietnamese advertising music often balances textural stability with sec
 
 ### Tempogram
 
-***Track 1***
+**Track 1**
 
 The cyclic tempogram of Track 1 reveals a strong sense of tempo stability centered around 118 BPM. Interestingly, the track begins with a slightly slower tempo (around 90 BPM), gradually accelerating and then stabilizing near 118 BPM. Toward the end of the piece (from ~190s onward), there is a slight deceleration, suggesting a structural cue for closure. These slight tempo modulations contribute to a musical contour that reinforces formal structure, subtly marking the entrance, development, and resolution of the track. 
 
-***Track 2***
+**Track 2**
 
 The cyclic tempogram of Track 2 clearly reveals a stable fundamental tempo centered around 100 BPM. Meanwhile, the fainter line around 140 BPM likely corresponds to a tempo-related harmonic, reflecting rhythmic embellishments such as faster decorative percussion.  Notably, the tempogram also displays a series of recurring vertical light lines at specific time points — particularly around 5s, 40s, 110s, and 140s. s. These indicate localised changes in beat salience and transient rhythmic disruptions, corresponding to musical transitions that can also be perceived aurally.
 
 Based on this tempogram analysis of these tracks, Vietnamese advertising background music appears characterized by clear, stable fundamental tempo structures, often accompanied by identifiable harmonic patterns. The rhythmic consistency observed suggests suitability for creating comfortable listening experiences while viewing nature and culture presented in video, essential in promotional contexts. While there are still visible changes presented in tempograms at certain time-points, these are not such huge changes and these changes seem to be mainly due to the changes in instrumentation when carefully listening to the tracks. 
 
 
-# Hierarchical clustering
+# Clustering
 
 ## Row 1 {.tabset .tabset-fade data-width="700"}
 
@@ -1024,6 +1024,7 @@ This assymmetrical structure overall highlights the diversity of class corpus.
 
 
 **About my tracks:**
+
 Both of my tracks are located within one of the large central clusters at level 4, alongside many other tracks in the class corpus. However, when examining the deeper levels of the dendrogram, the two tracks diverge significantly — each falling into different lower-level subclusters, indicating distinct musical-emotional profiles.
 
 - **lesley-n-1** appears on the far right of the dendrogram and is clustered with tracks like  wednesday-w-2, desmond-l-1, daniel-p-1, sanne-o-2, and ties-o-1/2. 
@@ -1039,7 +1040,7 @@ These heatmaps specifically isolate the two clusters of neighboring tracks close
 
 **Track 1**
 
-When listening to the other track neighbour and comparing it to my first track (lesley-n-1), I initially noticed very little similarity — if any at all. Those feel more electronic in nature, with a higher perceived arousal level and fewer acoustic elements. In contrast, my own track is rich in instrumental textures, prominently featuring Vietnamese zither, drums, and other traditional folk instruments. Based on this, I expected a clear difference in instrumentalness. However, the heatmap reveals a surprising result: both my track and its cluster neighbors share relatively similar and unexpectedly low z-scored instrumentalness values, with my track displaying one of the lowest scores in the cluster.
+When listening to the other track neighbours and comparing it to my first track (lesley-n-1), I initially noticed very little similarity — if any at all. Those feel more electronic in nature, with a higher perceived arousal level and fewer acoustic elements. In contrast, my own track is rich in instrumental textures, prominently featuring Vietnamese zither, drums, and other traditional folk instruments. Based on this, I expected a clear difference in instrumentalness. However, the heatmap reveals a surprising result: both my track and its cluster neighbors share relatively similar and unexpectedly low z-scored instrumentalness values, with my track displaying one of the lowest scores in the cluster.
 
 This raises an important question: Can current music information retrieval systems accurately detect and interpret non-Western traditional instruments? The fact that my track — which is clearly instrumental to the human ear — scores low in instrumentalness suggests that models trained primarily on Western music datasets may fail to recognize or appropriately weight traditional Vietnamese timbres.
 
