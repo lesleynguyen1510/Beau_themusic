@@ -596,7 +596,7 @@ The keygrams reveal tonal changes that provide insight into modulation patterns 
 
 **Track 1**
 
-Track 1 displays high tonal consistency throughout most of its duration, which aligns with the chordogram’s harmonic stability. HHowever, subtle key shifts occur around the 10-second mark, coinciding with the entrance of drums in the opening, and again near the 200-second mark, where the track transitions to a softer texture with only zither and piano. These moments of shift could represent musical framing devices, an intro and outro, helping to sonically define the start and finish while keeping the core tonal center stable.
+Track 1 displays high tonal consistency throughout most of its duration, which aligns with the chordogram’s harmonic stability. However, subtle key shifts occur around the 10-second mark, coinciding with the entrance of drums in the opening, and again near the 200-second mark, where the track transitions to a softer texture with only zither and piano. These moments of shift could represent musical framing devices, an intro and outro, helping to sonically define the start and finish while keeping the core tonal center stable.
 
 
 **Track 2**
@@ -606,7 +606,7 @@ In contrast, Track 2 reveals greater key mobility and fluctuating salience inten
 Overally, Vietnamese advertising music — based on these keygrams — tends to preserve a central tonal identity while integrating predictable modulations or localized key shifts. These tonal movements, visualized through chroma-based key salience, strike a balance between coherence and expressive flexibility. 
 
 
-# Cepstrogram
+# Cepstrograms
 
 ## Row 1 {data-width="350"}
 
