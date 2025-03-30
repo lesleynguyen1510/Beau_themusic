@@ -1,12 +1,42 @@
 ---
-title: "Computational Musicology 2025 Portfolio"
+title: "Vietnamese Advertising Music"
+author: "Lesley Nguyen"
 output: 
   flexdashboard::flex_dashboard:
+    storyboard: true
     orientation: columns
     vertical_layout: fill
-    storyboard: true
-    theme: paper 
+    theme: sandstone
 ---
+
+```{css, echo=FALSE}
+
+audio-container {
+  text-align: center;
+  margin: 20px 0;
+  padding: 10px;
+  border-radius: 10px;
+  background-color: #f7f7f7;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  max-width: 500px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.audio-container audio {
+  width: 100%;
+  border-radius: 10px;
+  border: 2px solid #ddd;
+}
+
+.audio-label {
+  font-size: 16px;
+  color: #333;
+  font-weight: bold;
+  margin-bottom: 10px;
+  display: block;
+}
+```
 
 ```{r setup, include=FALSE}
 library(flexdashboard)
@@ -20,6 +50,8 @@ library(tidymodels)
 library(ggdendro)
 library(heatmaply)
 library(kknn)
+library(htmltools)
+library(dendextend)
 
 compmus2025 <- read.csv("compmus2025.csv", header = TRUE, sep = ",")
 
@@ -53,165 +85,47 @@ get_pr <- function(fit) {
 }  
 ```
 
+# Music in Advertising Videos
 
-### Hierarchical clustering
-```{r}
-cluster_juice <-
-  recipe(
-    filename ~
-      approachability + 
-      arousal +
-      danceability +
-      instrumentalness +
-      engagingness +
-      tempo +
-      valence,
-    data = compmus2025
-  ) |>
-  step_center(all_predictors()) |>
-  step_scale(all_predictors()) |> 
-  # step_range(all_predictors()) |> 
-  prep(compmus2025) |>
-  juice() |>
-  column_to_rownames("filename")
+[A study by two researchers from Hungary](https://www.emerald.com/insight/content/doi/10.1108/cbth-11-2021-0265/full/html), Monica Coronel and Anna Irimiás, highlights how music plays a vital role in destination promotional videos, shaping both how viewers think and feel. Beyond simply capturing attention or creating atmosphere, music reflects a destination’s identity, evokes emotion, and connects with specific audiences on a deeper, cultural level.
 
-compmus_dist <- dist(cluster_juice, method = "euclidean")
+These findings inspired me to explore Vietnamese advertising music, particularly in understanding how its musical structure contributes to the emotional and cultural impact of advertisements. In this portfolio, I will investigate the musical characteristics and structural elements commonly found in Vietnamese advertising music. My central research question is:
 
-compmus_dist |> 
-  hclust(method = "average") |> # Try single, average, and complete.
-  dendro_data() |>
-  ggdendrogram() +
-  labs(title = "Dendrogram with All Features") + 
-  theme(plot.title = element_text(face = "bold"))
+**"What are the musical styles and structural features of Vietnamese advertising music?"**
 
-cluster_juice1 <-
-  recipe(
-    filename ~ arousal +
-      instrumentalness +
-      tempo,
-    data = compmus2025
-  ) |>
-  step_center(all_predictors()) |>
-  step_scale(all_predictors()) |> 
-  # step_range(all_predictors()) |> 
-  prep(compmus2025) |>
-  juice() |>
-  column_to_rownames("filename")
+To represent Vietnamese advertising music, I selected two tracks suitable for advertising videos showcasing Vietnamese culture and nature. After experimenting with generative AI tools, I opted for royalty-free tracks from Pixabay and SoundCloud. I used keywords such as *“Vietnam,” “folk instruments,” “adventurous music,”* and *“travel”* on both platforms, and filtered for *“bright”* mood and *“cinematic music”* theme on Pixabay. I chose these tracks as they feature Vietnamese folk instruments — a key focus — and include a strong bass, which I think would enhance engagement and evoke emotions in listeners, aligning well with the commercial and storytelling purposes of advertising videos.
 
-compmus_dist <- dist(cluster_juice1, method = "euclidean")
+Here are my two tracks:
 
-compmus_dist |> 
-  hclust(method = "average") |> # Try single, average, and complete.
-  dendro_data() |>
-  ggdendrogram() +
-  labs(title = "Dendrogram with Arousal, Instrumentalness, and Tempo") + 
-  theme(plot.title = element_text(face = "bold"))
+```{r, echo = FALSE}
+HTML('
+  <div class="audio-container">
+    <label class="audio-label">Track 1: lesley-n-1</label>
+    <audio controls>
+      <source src="corpus/lesley-n-1.mp3" type="audio/mpeg">
+      Trình duyệt của bạn không hỗ trợ thẻ audio.
+    </audio>
+  </div>
+')
 ```
 
-*** 
-When using all the Essentia features, the dendrogram tends to be skewed and asymmetrical, with most of the branches clustering towards the left side. This suggests that the data is concentrated in a specific area, making it harder to assess the similarity between tracks. The resulting over-clustering can make it difficult to interpret the relationships between tracks effectively. 
-
-When filtering down to just the features arousal, instrumentalness, and tempo, the dendrogram becomes more symmetrical and clearer. With fewer and more relevant features, the clusters in the dendrogram appear more distinct and balanced, making it easier to differentiate between tracks that share stronger similarities. This reduced complexity allows for a clearer visualization of the data, which aligns better with the perceived musical traits of the tracks
-
-Despite initially perceiving that the two tracks I focused sounded quite similar, the dendrogram shows that they are, in fact, quite distant from each other. The first track is positioned on the far left of the dendrogram, grouped closely with tracks like ties-o-2 and wednesday-w-2. In contrast, the second track is placed more towards the right, clustering with tracks like daniel-p-2 and sarya-h-2. 
-
-### Heatmap
-
-```{r}
-heatmaply(
-  cluster_juice1,
-  hclustfun = hclust,
-  hclust_method = "average",  # Change for single, average, or complete linkage.
-  dist_method = "euclidean"
-)
+```{r, echo = FALSE}
+HTML('
+  <div class="audio-container">
+    <label class="audio-label">Track 2: lesley-n-2</label>
+    <audio controls>
+      <source src="corpus/lesley-n-2.mp3" type="audio/mpeg">
+      Trình duyệt của bạn không hỗ trợ thẻ audio.
+    </audio>
+  </div>
+')
 ```
 
-*** 
-Track 1
+# Overview (track-level)
 
-When listening to ties-o-2 and wednesday-w-2, and comparing them to my first track, I initially noticed very little similarity, if not none at all. However, the heatmap reveals that these three tracks share relatively similar values in instrumentalness. Surprisingly, all three have negative values, which I didn’t expect, particularly for my own track. Despite hearing many instrumental sounds, including Vietnamese zither, drums, and other traditional instruments combined throughout the song, the system does not seem to highlight these aspects. This raises concerns about whether non-Western traditional instruments can be effectively captured and represented by the system.
+## Row 1 {data-width="700"}
 
-Track 2
-
-When comparing daniel-p-2 and sarya-h-2 with my second track, I recognize a similarity in their tempo, as all three tracks have a relatively slow tempo. Additionally, their song structures are quite simple, which I believe explains why their arousal and tempo values are closely grouped together in the heatmap.
-
-Track 1+2
-
-I am still quite concerned about the system's ability to accurately extract instrumentalness, as my first track has a negative value, while the second track has a positive one. However, upon listening to both tracks, I noticed that while the second track features flute sounds, it seems to predominantly contain electronic sound effects, unlike track 1, which is more focused on the combination of various traditional instruments. This discrepancy raises questions about how the system differentiates between non-Western traditional instruments and electronic sounds, and whether it can fully capture the nuanced instrumental features present in each track.
-
-
-### Classifying
-```{r}
-compmus2025_filtered <- 
-  compmus2025 |> filter(!is.na(ai)) |> 
-  mutate(ai = factor(if_else(ai, "AI", "Non-AI")))
-
-classification_recipe <-
-  recipe(
-    ai ~
-      instrumentalness + danceability + tempo,
-    data = compmus2025_filtered
-  ) |>
-  step_center(all_predictors()) |>
-  step_scale(all_predictors())      # Converts to z-scores.
-  # step_range(all_predictors())    # Sets range to [0, 1].
-
-compmus_cv <- compmus2025_filtered |> vfold_cv(5)
-
-knn_model <-
-  nearest_neighbor(neighbors = 1) |>
-  set_mode("classification") |> 
-  set_engine("kknn")
-classification_knn <- 
-  workflow() |> 
-  add_recipe(classification_recipe) |> 
-  add_model(knn_model) |> 
-  fit_resamples(compmus_cv, control = control_resamples(save_pred = TRUE))
-
-classification_knn |> get_conf_mat()
-
-classification_knn |> get_conf_mat() |> autoplot(type = "mosaic")
-
-classification_knn |> get_conf_mat() |> autoplot(type = "heatmap")
-```
-
-*** 
-The mosaic on the left illustrates the performance of a classifier attempting to distinguish between AI-generated and non-AI-generated tracks. Using k-Nearest Neighbour classifier, the most important features for classifying tracks are: instrumentalness + danceability + tempo. These features give the highest scores for AI-AI (prediction-truth) and non-AI - non-AI (prediction-truth), among the various feature combinations tested. This suggests that these features could be crucial and valuable for identifying whether a track is generated by AI or not.
-
-
-### Histogram of class corpus's tempo
-```{r}
-compmus2025_tempo <- compmus2025 %>%
-  mutate(is_lesley = ifelse(grepl("lesley", filename, ignore.case = TRUE), 
-                            "Lesley", "Other"))
-
-p_tempo_hist <- ggplot(compmus2025_tempo, aes(x = tempo)) +
-  geom_histogram(bins = 20, fill = "grey") +
-  labs(
-    title = "Distribution of Tempo in the Class Corpus",
-    x = "Tempo (BPM)",
-    y = "Count"
-  ) +
-  theme_light()
-
-p_tempo_hist
-```
-
-
-### Music in Advertising Videos and The Study about Vietnamese music
-
-[A study by two researchers from Hungary](https://www.emerald.com/insight/content/doi/10.1108/cbth-11-2021-0265/full/html), Monica Coronel and Anna Irimiás, confirms that music plays an essential supporting role in “destination promotional videos” and “tourism marketing,” stimulating both cognitive and affective responses. Specifically, their research reveals that background music can capture attention, reflect a destination’s characteristics, target specific audiences, highlight cultural identity, elicit emotions, and create ambience.
-
-These findings about the importance of music in tourism marketing led me to explore Vietnamese advertising music and compare it with global music trends. In particular, my research question focuses on:
-
-**“How does the musical style of Vietnamese advertising music compare to other music? Does it have distinct characteristics, or does it align with broader global trends?”**
-
-To represent Vietnamese advertising music, I selected two tracks suitable for advertising videos showcasing Vietnamese culture and nature. After experimenting with generative AI tools, I opted for royalty-free tracks from Pixabay and SoundCloud. I used keywords such as *“Vietnam,” “folk instruments,” “adventurous music,”* and *“travel”* on both platforms, and filtered for *“bright”* mood and *“cinematic music”* theme on Pixabay. I chose these tracks because they feature Vietnamese folk instruments—a key focus—and include a strong bass that enhances engagement and evokes emotions in listeners, aligning well with the commercial and storytelling purposes of advertising videos.
-
-To support and contextualize the comparisons with other "global music trends", I will analyze Vietnamese advertising music alongside three Western music styles observed in the class corpus: rock (lennart-p-2), blue jazz (gijs-s-2), and traditional jazz (jasper-v-1). These genres provide contrasting perspectives on harmony, loudness dynamics, timbre, and rhythmic structure, allowing me to assess whether Vietnamese advertising music exhibits distinctive characteristics or aligns with broader global trends.
-
-
-### What are the overall characteristics of these two Vietnamese background music tracks in terms of Essentia features
+### Overall 
 
 ```{r}
 compmus2025_numeric_original <- compmus2025 %>% select(where(is.numeric))
@@ -259,7 +173,7 @@ p <- ggplot(compmus2025_long, aes(x = Feature, y = Value)) +
                 "<br>Real Value:", round(RealValue, 3)
               )),
               color = "deeppink", width = 0.2, alpha = 10, size = 4) +  
-   theme_light() +
+   theme_classic() +
   labs(x = "Essentia Features",
        y = "Normalized Value") +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
@@ -268,34 +182,30 @@ plotly_plot <- style(plotly_plot, hoverinfo = "skip", traces = 1)
 plotly_plot
 ```
 
-***
-This interactive boxplot presents the distribution of various Essentia features extracted from the class corpus. The <span style="color:black"><b>black</b></span> points represent all tracks in the dataset, while my tracks are highlighted in <span style="color:deeppink"><b>pink</b></span> for better visibility.
+## Row 2 {data-width="300"}
 
-My tracks are scattered across different features, showing varying degrees of similarity and uniqueness compared to the "average" track in the corpus:
+### Description
 
-- **Arousal, Danceability, Engagingness and Valence**: My tracks tend to be closer to the median or remain within the general range of the corpus, suggesting they align with the typical characteristics of the class corpus
+This interactive boxplot presents the distribution of various Essentia features extracted from the class corpus. The [<b>black</b>]{style="color:black"} points represent all tracks in the dataset, while my tracks are highlighted in [<b>pink</b>]{style="color:deeppink"} for better visibility.
 
-- **Approachability & Instrumentalness**: My two tracks are both positioned higher than the median, or  toward the higher end of the distribution, indicating they are significantly different from the majority of tracks
+The two selected tracks reflect two different musical directions within Vietnamese advertising music:
 
-- **Tempo**: My tracks are distributed outside the interquartile range (IQR) with the intension to lean toward either the upper or lower quartile, showing that they deviate significantly from the majority of the class corpus with the higher-than-average or lower-than-average speeds
+**lesley-n-1** stands out for its exceptionally high approachability, making it instantly accessible and friendly - an essential trait for drawing in diverse audiences. However, its low instrumentalness indicates a minimal presence of traditional instruments, which may limit its cultural specificity.
 
+Meanwhile, **lesley-n-2** leans toward a more culturally expressive profile, with above-average instrumentalness, likely reflecting folk instrumentation - one of the core traits in Vietnamese promotional media.
 
-### Key Takeaways
-Based on the distribution of my tracks compared to the class corpus, the key insights are:
-
-- My tracks are not drastically different in features like *danceability* and *arousal*, meaning they share common rhythmic and energetic characteristics with the class corpus
-
-- While my tracks generally follow the overall trends in most features, their placement in *instrumentalness* and *approachability* suggests a distinct musical approach, likely incorporating many traditional instruments with simpler harmonies and familiar structures to enhance accessibility for a diverse audience
-
-- *Tempo* also show the uniqueness with a track leaning towards fast-paced compositions, while other adopt a slower, more relaxed pacing
-
-This visualization provides a clear comparison of how my tracks align with the broader dataset and which features distinguish them. It confirms that Essentia effectively identifies track characteristics and highlights both similarities and unique elements of my track.
+Interestingly, **both tracks** fall below the corpus mean in engagingness, suggesting a lack of dynamism or emotional activation, which may reduce their impact in sustaining audience attention. In particular, **lesley-n-2** also scores notably low in both arousal and valence, suggesting a more subdued emotional tone. In contrast, danceability and tempo for both tracks remain close to the corpus median, maintaining rhythmic consistency. Altogether, these characteristics shape a calm and stable musical texture—less dynamic, but well-suited for a supporting role in storytelling within advertising videos.
 
 
-### Chromagram
-``` {r}
+# Chromagrams
+
+## Row 1 {data-width="350"}
+
+### Track 1
+
+```{r, chromagrams track 1}
 "features/lesley-n-1.json" |>
-  compmus_chroma(norm = "chebyshev") |>             
+  compmus_chroma(norm = "euclidean") |>             
   ggplot(aes(x = time, y = pc, fill = value)) + 
   geom_raster() +
   scale_y_continuous(
@@ -307,15 +217,28 @@ This visualization provides a clear comparison of how my tracks align with the b
                 "G#|Ab", "A", "A#|Bb", "B"
               )
   ) +
-  scale_fill_viridis_c(guide = "none") +
-  labs(title = "Track 1", 
+  scale_fill_viridis_c(option = "inferno", name = "Magnitude") +
+  labs(title = "Chromagram", 
+       subtitle = "Track 1", 
        x = "Time (s)", 
        y = NULL, 
        fill = NULL) +
-   theme_light() 
+   theme_classic() + 
+  theme(plot.title = element_text(size = 14, face = "bold"),
+    plot.subtitle = element_text(size = 10),
+    axis.text.y = element_text(size = 8, hjust = 1),  
+    axis.text.x = element_text(size = 8)
+  )
+```
+
+## Row 2 {data-width="350"}
+
+### Track 2
+
+```{r, chromagram track 2}
 
 "features/lesley-n-2.json" |>
-  compmus_chroma(norm = "chebyshev") |>             
+  compmus_chroma(norm = "euclidean") |>             
   ggplot(aes(x = time, y = pc, fill = value)) + 
   geom_raster() +
   scale_y_continuous(
@@ -327,75 +250,40 @@ This visualization provides a clear comparison of how my tracks align with the b
                 "G#|Ab", "A", "A#|Bb", "B"
               )
   ) +
-  scale_fill_viridis_c(guide = "none") +
-  labs(title = "Track 2", 
+  scale_fill_viridis_c(option = "inferno", name = "Magnitude") +
+  labs(title = "Chromagram", 
+       subtitle = "Track 2", 
        x = "Time (s)", 
        y = NULL, 
        fill = NULL) +
-   theme_light() 
+   theme_classic()+   
+  theme(plot.title = element_text(size = 14, face = "bold"),
+    plot.subtitle = element_text(size = 10),
+    axis.text.y = element_text(size = 8, hjust = 1),  
+    axis.text.x = element_text(size = 8)
+  )
 
 ```
 
-***
-The first chromagram reveals a dynamically structured piece that doesn’t settle on a single tonal center but rather employs a wide array of pitch classes throughout its duration
+## Row 3 {data-width="300"}
 
-- **Broad Pitch Utilization**: The entire 12-tone pitch spectrum is active throughout the piece. Bright bands appear across nearly all pitch classes, indicating that the composition does not fixate on one key but instead incorporates chromatic elements or frequent modulations
+### Description
+The chromagrams provide a snapshot of pitch class usage in Vietnamese advertising music:
 
-- **Recurring Clusters**: Noticeable clusters of intense activity at specific time intervals suggest repeated melodic or harmonic motifs, hinting at the use of recurring chord progressions or thematic material
+**Track 1** shows strong concentration in D, E, F, G, and A, forming a pentatonic-like scale closely associated with traditional Vietnamese folk music. The absence of diverse chromatic tones contributes to a stable and grounded harmonic palette, supporting a grounded, calm sonic environment — ideal as a subtle background in storytelling-focused advertisements. 
 
+**Track 2** reveals consistent and strong chromatic activity in D, E, F♯, G, and A, forming a distinct D major or D-based pentatonic scale. This structure also reflects Southeast Asian tonalities but with slightly more brightness and motion with very light traces of C, F, and B pitch classes, suggesting a more evolving harmonic texture. 
 
-### Chroma-based and Timbre-based Self-similarity Matrices
-``` {r}
-p_chroma <- "features/lesley-n-1.json" |>                           
-  compmus_chroma(norm = "chebyshev") |>                   
-  compmus_self_similarity(
-    feature = pc) |>   
-  ggplot(aes(x = xtime, y = ytime, fill = d)) + 
-  geom_raster() +
-  scale_fill_viridis_c(guide = "none") +             
-  labs(title = "Chroma",
-       x = "Time (s)", y = NULL, fill = NULL) +
-  theme_minimal(base_size = 14) +
-  coord_fixed()
-
-p_timbre <- "features/lesley-n-1.json" |>             
-  compmus_mfccs(norm = "euclidean") |>  
-  compmus_self_similarity(
-    feature = mfcc,
-    distance = "cosine"
-  ) |>   
-  ggplot(aes(x = xtime, y = ytime, fill = d)) + 
-  geom_raster() +
-  scale_fill_viridis_c(guide = "none") +
-  labs( title = "Timbre", 
-        x = "Time (s)", y = NULL, fill = NULL) +
-  theme_minimal(base_size = 14) +
-  coord_fixed()
-
- p_chroma + p_timbre
-```
-
-*** 
-**Chroma-based Self-Similarity Matrix**
-
-The block-like structures and distinct lines are more apparent, indicating sections of the track where harmonic repetition homogeneity occurs:
-
-- Block-like structures: These represent homogeneous musical sections such as verses or choruses
-
-- Distinct, sometimes blurred, paths parallel to the main diagonal: These indicate repeated sections occurring at regular time intervals, even if the patterns aren’t perfectly sharp
-
-**Timbre-based Self-Similarity Matrix**
-
-The block-like structures are less clear. Instead, the streaks are more blurred and evenly distributed, suggesting that there is variability in timbre throughout the track
-
-- The absence of distinct parallel diagonal lines may indicate that the track experiences significant changes in instrumentation or arrangement between different sections
-
-- Bright areas appearing along the edges and center might represent sections where there are changes in instrumentation or performance style, such as a drop or a solo instrumental segment
+Both tracks rely on pentatonic frameworks, showing that Vietnamese advertising music often draws from folk-inspired tonal material to convey cultural identity. 
 
 
-### Chordograms
+# Chord and Key Estimation
 
-```{r, chordogram, fig.width=10, fig.height=6, out.width='80%'}
+## Row 1 {.tabset .tabset-fade data-width="350"}
+
+### Track 1 - Chordogram
+
+```{r, chordogram track 1}
 #      C     C#    D     Eb    E     F     F#    G     Ab    A     Bb    B
 major_chord <-
   c(   1,    0,    0,    0,    1,    0,    0,    1,    0,    0,    0,    0)
@@ -450,68 +338,30 @@ chord_templates <-
   )
 
 "features/lesley-n-1.json" |> 
- compmus_chroma(norm = "chebyshev") |> 
+ compmus_chroma(norm = "euclidean") |> 
   compmus_match_pitch_templates(
     chord_templates,        
-    norm = "chebyshev" 
+    norm = "euclidean", 
+    distance = "cosine"
   ) |>
   ggplot(aes(x = time, y = name, fill = d)) + 
   geom_raster() +
-  scale_fill_viridis_c(option = "plasma") + 
-  labs(title = "Track 1", 
-       x = "Time (s)", 
+  scale_fill_viridis_c(option = "inferno", guide = "none") + 
+  labs(title = "Chordogram", 
+       subtitle = "Track 1",
+    x = "Time (s)", 
        y = "Chords", 
        fill = NULL) +
-  theme_light() +
- theme(axis.text.y = element_text(size = 8, hjust = 1),  
-    axis.text.x = element_text(size = 8),
-    plot.margin = margin(10, 10, 10, 10) 
- )
+  theme_classic() +
+  theme(plot.title = element_text(size = 14, face = "bold"),
+    plot.subtitle = element_text(size = 10),
+    axis.text.y = element_text(size = 8, hjust = 1),  
+    axis.text.x = element_text(size = 8))
+```
 
+### Track 1 - Keygram
 
-"features/lesley-n-2.json" |> 
-  compmus_chroma(norm = "chebyshev") |> 
-  compmus_match_pitch_templates(
-    chord_templates,        
-    norm = "chebyshev"
-  ) |>
-  ggplot(aes(x = time, y = name, fill = d)) + 
-  geom_raster() +
-  scale_fill_viridis_c(option = "plasma") + 
-  labs(title = "Track 2", 
-       x = "Time (s)", 
-       y = "Chords", 
-       fill = NULL) +
-  theme_light() +
-  theme(axis.text.y = element_text(size = 8, hjust = 1),  
-    axis.text.x = element_text(size = 8),
-    plot.margin = margin(10, 10, 10, 10)
-  )
-```  
-
-***
-These chordograms visualize the harmonic structure of Track 1 and 2, displaying the evolution of chords over time. The Y-axis represents different chords used in the track, including major (maj), minor (min), dominant 7th (7), and diminished chords, while the X-axis represents time in seconds. The color intensity indicates the activation strength or presence probability of each chord at any given moment, with <span style="color:gold"><b>bright yellow</b></span> signifying strong chord presence and <span style="color:purple"><b>dark purple</b></span> indicating weaker or less frequent occurrences
-
-**Track 1**
-
-- The chordogram shows a relatively stable harmonic structure throughout the piece, with minimal drastic changes
-
-- The pitch material appears to be concentrated in specific regions, particularly around G♭ major, A♭ major, B major, and D♯ minor
-
-- The intensity distribution is fairly even, suggesting recurrent harmonic patterns rather than abrupt modulations.
-This track lacks significant harmonic shifts, indicating a more consistent chord progression and possibly a repetitive structure
-
-**Track 2**
-
-- Unlike Track 1, this track displays more frequent variations in harmonic intensity, which suggests a more dynamic harmonic progression
-
-- There are clear moments of discontinuity around 60s, 100s, 160s, and 190s, indicating modulations or transitions between different sections of the piece
-
-- The intensity variations across time suggest moments of greater harmonic complexity, potentially due to instrumental improvisation
-
-
-### Keygrams
-``` {r, keygram, fig.width=10, fig.height=6, out.width='80%'}
+```{r, keygram track 1}
 #      C     C#    D     Eb    E     F     F#    G     Ab    A     Bb    B
 major_chord <-
   c(   1,    0,    0,    0,    1,    0,    0,    1,    0,    0,    0,    0)
@@ -555,75 +405,421 @@ key_templates <-
   )
   
 "features/lesley-n-1.json" |> 
- compmus_chroma(norm = "chebyshev") |> 
+ compmus_chroma(norm = "euclidean") |> 
   compmus_match_pitch_templates(
     key_templates,        
-    norm = "chebyshev" 
+    norm = "euclidean", 
+    distance = "cosine"
   ) |>
   ggplot(aes(x = time, y = name, fill = d)) + 
   geom_raster() +
-  scale_fill_viridis_c(option = "plasma") + 
-  labs(title = "Track 1", 
-       x = "Time (s)", 
+  scale_fill_viridis_c(option = "inferno", guide = "none") + 
+  labs(title = "Keygram",
+       subtitle = "Track 1",
+    x = "Time (s)", 
        y = "Keys", 
        fill = NULL) +
-  theme_light() +
- theme(axis.text.y = element_text(size = 8, hjust = 1),  
-    axis.text.x = element_text(size = 8),
-    plot.margin = margin(10, 10, 10, 10) 
+  theme_classic() +
+  theme(plot.title = element_text(size = 14, face = "bold"),
+    plot.subtitle = element_text(size = 10),
+    axis.text.y = element_text(size = 8, hjust = 1),  
+    axis.text.x = element_text(size = 8)
  )
-
-
-"features/lesley-n-2.json" |> 
-  compmus_chroma(norm = "chebyshev") |> 
-  compmus_match_pitch_templates(
-    key_templates,        
-    norm = "chebyshev"
-  ) |>
-  ggplot(aes(x = time, y = name, fill = d)) + 
-  geom_raster() +
-  scale_fill_viridis_c(option = "plasma") + 
-  labs(title = "Track 2", 
-       x = "Time (s)", 
-       y = "Keys", 
-       fill = NULL) +
-  theme_light() +
-  theme(axis.text.y = element_text(size = 8, hjust = 1),  
-    axis.text.x = element_text(size = 8),
-    plot.margin = margin(10, 10, 10, 10)
-  )
 ```
 
-***
-These keygrams exhibit a more ambiguous structure, with a diverse and less clearly defined focus on specific musical keys throughout the track. 
+## Row 2 {.tabset .tabset-fade data-width="350"}
 
-(I plan to analyze this further in the future, as I find some aspects of it quite confusing at the moment :) )
+### Track 2 - Chordogram
+
+```{r, chordogram track 2}
+#      C     C#    D     Eb    E     F     F#    G     Ab    A     Bb    B
+major_chord <-
+  c(   1,    0,    0,    0,    1,    0,    0,    1,    0,    0,    0,    0)
+minor_chord <-
+  c(   1,    0,    0,    1,    0,    0,    0,    1,    0,    0,    0,    0)
+seventh_chord <-
+  c(   1,    0,    0,    0,    1,    0,    0,    1,    0,    0,    1,    0)
+
+major_key <-
+  c(6.35, 2.23, 3.48, 2.33, 4.38, 4.09, 2.52, 5.19, 2.39, 3.66, 2.29, 2.88)
+minor_key <-
+  c(6.33, 2.68, 3.52, 5.38, 2.60, 3.53, 2.54, 4.75, 3.98, 2.69, 3.34, 3.17)
+
+chord_templates <-
+  tribble(
+    ~name, ~template,
+    "Gb:7", circshift(seventh_chord, 6),
+    "Gb:maj", circshift(major_chord, 6),
+    "Bb:min", circshift(minor_chord, 10),
+    "Db:maj", circshift(major_chord, 1),
+    "F:min", circshift(minor_chord, 5),
+    "Ab:7", circshift(seventh_chord, 8),
+    "Ab:maj", circshift(major_chord, 8),
+    "C:min", circshift(minor_chord, 0),
+    "Eb:7", circshift(seventh_chord, 3),
+    "Eb:maj", circshift(major_chord, 3),
+    "G:min", circshift(minor_chord, 7),
+    "Bb:7", circshift(seventh_chord, 10),
+    "Bb:maj", circshift(major_chord, 10),
+    "D:min", circshift(minor_chord, 2),
+    "F:7", circshift(seventh_chord, 5),
+    "F:maj", circshift(major_chord, 5),
+    "A:min", circshift(minor_chord, 9),
+    "C:7", circshift(seventh_chord, 0),
+    "C:maj", circshift(major_chord, 0),
+    "E:min", circshift(minor_chord, 4),
+    "G:7", circshift(seventh_chord, 7),
+    "G:maj", circshift(major_chord, 7),
+    "B:min", circshift(minor_chord, 11),
+    "D:7", circshift(seventh_chord, 2),
+    "D:maj", circshift(major_chord, 2),
+    "F#:min", circshift(minor_chord, 6),
+    "A:7", circshift(seventh_chord, 9),
+    "A:maj", circshift(major_chord, 9),
+    "C#:min", circshift(minor_chord, 1),
+    "E:7", circshift(seventh_chord, 4),
+    "E:maj", circshift(major_chord, 4),
+    "G#:min", circshift(minor_chord, 8),
+    "B:7", circshift(seventh_chord, 11),
+    "B:maj", circshift(major_chord, 11),
+    "D#:min", circshift(minor_chord, 3)
+  )
+
+"features/lesley-n-2.json" |> 
+ compmus_chroma(norm = "euclidean") |> 
+  compmus_match_pitch_templates(
+    chord_templates,        
+    norm = "euclidean", 
+    distance = "cosine"
+  ) |>
+  ggplot(aes(x = time, y = name, fill = d)) + 
+  geom_raster() +
+  scale_fill_viridis_c(option = "inferno", guide = "none") + 
+  labs(title = "Chordogram",
+       subtitle = "Track 2",
+    x = "Time (s)", 
+       y = "Chords", 
+       fill = NULL) +
+  theme_classic() +
+  theme(plot.title = element_text(size = 14, face = "bold"),
+    plot.subtitle = element_text(size = 10),
+    axis.text.y = element_text(size = 8, hjust = 1),  
+    axis.text.x = element_text(size = 8)
+ )
+```
+
+### Track 2 - Keygram
+
+```{r, keygram track 2}
+#      C     C#    D     Eb    E     F     F#    G     Ab    A     Bb    B
+major_chord <-
+  c(   1,    0,    0,    0,    1,    0,    0,    1,    0,    0,    0,    0)
+minor_chord <-
+  c(   1,    0,    0,    1,    0,    0,    0,    1,    0,    0,    0,    0)
+seventh_chord <-
+  c(   1,    0,    0,    0,    1,    0,    0,    1,    0,    0,    1,    0)
+
+major_key <-
+  c(6.35, 2.23, 3.48, 2.33, 4.38, 4.09, 2.52, 5.19, 2.39, 3.66, 2.29, 2.88)
+minor_key <-
+  c(6.33, 2.68, 3.52, 5.38, 2.60, 3.53, 2.54, 4.75, 3.98, 2.69, 3.34, 3.17)
+
+key_templates <-
+  tribble(
+    ~name, ~template,
+    "Gb:maj", circshift(major_key, 6),
+    "Bb:min", circshift(minor_key, 10),
+    "Db:maj", circshift(major_key, 1),
+    "F:min", circshift(minor_key, 5),
+    "Ab:maj", circshift(major_key, 8),
+    "C:min", circshift(minor_key, 0),
+    "Eb:maj", circshift(major_key, 3),
+    "G:min", circshift(minor_key, 7),
+    "Bb:maj", circshift(major_key, 10),
+    "D:min", circshift(minor_key, 2),
+    "F:maj", circshift(major_key, 5),
+    "A:min", circshift(minor_key, 9),
+    "C:maj", circshift(major_key, 0),
+    "E:min", circshift(minor_key, 4),
+    "G:maj", circshift(major_key, 7),
+    "B:min", circshift(minor_key, 11),
+    "D:maj", circshift(major_key, 2),
+    "F#:min", circshift(minor_key, 6),
+    "A:maj", circshift(major_key, 9),
+    "C#:min", circshift(minor_key, 1),
+    "E:maj", circshift(major_key, 4),
+    "G#:min", circshift(minor_key, 8),
+    "B:maj", circshift(major_key, 11),
+    "D#:min", circshift(minor_key, 3)
+  )
+  
+"features/lesley-n-2.json" |> 
+ compmus_chroma(norm = "euclidean") |> 
+  compmus_match_pitch_templates(
+    key_templates,        
+    norm = "euclidean", 
+    distance = "cosine"
+  ) |>
+  ggplot(aes(x = time, y = name, fill = d)) + 
+  geom_raster() +
+  scale_fill_viridis_c(option = "inferno", guide = "none") + 
+  labs(title = "Keygram", 
+       subtitle = "Track 2",
+    x = "Time (s)", 
+       y = "Keys", 
+       fill = NULL) +
+  theme_classic() +
+ theme(plot.title = element_text(size = 14, face = "bold"),
+    plot.subtitle = element_text(size = 10),
+    axis.text.y = element_text(size = 8, hjust = 1),  
+    axis.text.x = element_text(size = 8)
+ )
+```
+
+## Row 3 {.tabset .tabset-fade data-width="300"}
+
+### Chordogram
+These chordograms visualize the harmonic structure of Track 1 and 2:
+
+**Track 1**
+
+The chordogram for Track 1 reflects a stable and harmonically grounded structure with the focus on less conventional chords such as G♭:maj, A♭:maj, E♭:maj, G♯:min, B:maj, and D♯:min. These chords lie outside the standard diatonic palette, hinting at either modal ambiguity, borrowed chords, or a non-Western tuning approach. The absence of strong transitions or modulations points toward a repetitive structure and a consistent tonal center, which supports the function of the track as a calm backdrop. 
+
+**Track 2**
+
+In contrast, Track 2 exhibits greater harmonic variability and dynamic chord progression. The distribution is much denser and more active across the entire vertical axis, such as mid-lower range: noticeable intensities in F:min, A♭:maj, D:min, E:min, G:min, and minor and 7th chords are frequent, suggesting richer harmonic color. Moreover, the chordogram reveals clear shifts in harmonic intensity at around 60s, 100s, 160s, and 190s, pointing to sectional modulations. 
+This type of progression allows the music to integrate into multi-scene commercials or cinematic storytelling, where music needs to evolve with the visual narrative. 
 
 
-### Tempograms
-```{r, tempogram-plots}
+### Keygram
+The keygrams reveal tonal changes that provide insight into modulation patterns and instrumental improvisation across both tracks: 
 
-my_tempogram_theme <- theme(
-  plot.title = element_text(size = 14, face = "bold"),     
-  plot.subtitle = element_text(size = 12),  
-  axis.title = element_text(size = 10),     
-  axis.text = element_text(size = 8)      
+**Track 1**
+
+Track 1 displays high tonal consistency throughout most of its duration, which aligns with the chordogram’s harmonic stability. HHowever, subtle key shifts occur around the 10-second mark, coinciding with the entrance of drums in the opening, and again near the 200-second mark, where the track transitions to a softer texture with only zither and piano. These moments of shift could represent musical framing devices, an intro and outro, helping to sonically define the start and finish while keeping the core tonal center stable.
+
+
+**Track 2**
+
+In contrast, Track 2 reveals greater key mobility and fluctuating salience intensities across time. Alternating vertical bands of brightness and darkness represent dynamic modulations or shifts in tonal emphasis. For example, the darker-toned segments (0–60s and 110–150s) align with deeper, more ambient passages featuring subdued percussion and warm string textures. Meanwhile, the brighter intervals (60–110s and post-150s) suggest instrumental improvisation driven by high-pitched flutes and electronic embellishments that bring an evolution in harmonic structure.
+
+Overally, Vietnamese advertising music — based on these keygrams — tends to preserve a central tonal identity while integrating predictable modulations or localized key shifts. These tonal movements, visualized through chroma-based key salience, strike a balance between coherence and expressive flexibility. 
+
+
+# Cepstrogram
+
+## Row 1 {data-width="350"}
+
+### Track 1
+
+```{r, cepstrogram track 1}
+"features/lesley-n-1.json" |>                         
+  compmus_mfccs(norm = "identity") |> 
+  ggplot(aes(x = time, y = mfcc, fill = value)) + 
+  geom_raster() +
+  scale_y_continuous(
+    breaks = 0:12,
+    minor_breaks = NULL,
+  ) +
+  scale_fill_viridis_c(option = "inferno", guide = "none") +            
+  labs(title = "Cepstrogram", 
+       subtitle = "Track 1", 
+    x = "Time (s)", 
+    y = "Coefficient Number", fill = NULL) +
+  theme_classic() +
+  theme(plot.title = element_text(size = 14, face = "bold"),
+    plot.subtitle = element_text(size = 10),
+    axis.text.y = element_text(size = 8, hjust = 1),  
+    axis.text.x = element_text(size = 8)
 )
 
-"features/lesley-n-1.json" |>
-  compmus_tempogram(window_size = 8, hop_size = 1, cyclic = FALSE) |>
-  ggplot(aes(x = time, y = bpm, fill = power)) +
-  geom_raster() +
-  scale_fill_viridis_c(guide = "none") +
-  labs(
-    title = "Fourier-based tempogram (non-cyclic)",
-    subtitle = "Track 1", 
-    x = "Time (s)", 
-    y = "Tempo (BPM)"
-  ) +
-  theme_classic() +
-  my_tempogram_theme
+```
 
+## Row 2 {data-width="350"}
+
+### Track 2
+
+```{r, cepstrogram track 2}
+"features/lesley-n-2.json" |>                        
+  compmus_mfccs(norm = "identity") |>                  
+  ggplot(aes(x = time, y = mfcc, fill = value)) + 
+  geom_raster() +
+  scale_y_continuous(
+    breaks = 0:12,
+    minor_breaks = NULL,
+  ) +
+  scale_fill_viridis_c(option = "inferno", guide = "none") +               
+  labs(title = "Cepstrogram", 
+       subtitle = "Track 2", 
+    x = "Time (s)", 
+    y = "Coefficient Number", fill = NULL) +
+  theme_classic() +
+  theme(plot.title = element_text(size = 14, face = "bold"),
+    plot.subtitle = element_text(size = 10),
+    axis.text.y = element_text(size = 8, hjust = 1),  
+    axis.text.x = element_text(size = 8)
+)
+```
+
+## Row 3 {data-width="300"}
+
+### Description
+
+The cepstrogram analysis offers a deeper look into the timbral landscape of both tracks: 
+
+**Track 1**
+
+While Track 1 maintains an overall timbral consistency in the higher coefficients (3 and above), there are noticeable changes at specific time points such as 10s, 40s, 70s, 120s, 125s, 160s and 190s. These momentary shifts suggest transient structural and instrumental events. 
+
+More notably, if we observe the lower-order coefficients — especially coefficients 0 and 1, which represent overall energy and spectral shape — we can identify distinct changes in color and intensity during 70s to 110s and again between 160s and 190s. These segments likely correspond to the use of transitional sound effects and the introduction of organ-like timbres, which slightly disturb the otherwise smooth texture. Such elements might serve to subtly signal new scenes and guide emotional flow in an advertisement, without disrupting the central tonal grounding of the track.
+
+
+**Track 2**
+
+Compared to Track 1, Track 2 exhibits more dynamic changes in timbre over time across almost all coefficients, indicating a more expressive and evolving sonic texture. In the higher-order coefficients (3 and above), there are  alternating bands of darker and brighter orange colors, pointing to fluctuating spectral complexity. These visual contrasts align closely with the keygram analysis, where 
+I noted tonal shifts and evolving harmonic intensities, further reinforcing the track's structural variability.
+
+A particularly striking feature appears in coefficient 1, where a distinct and consistently bright orange band emerges around the midpoint of the track. This moment corresponds with a transition between two major sections, marked by the entrance of a solo drum motif.
+
+These findings suggest that timbral variation — whether minimal and steady as in Track 1 or more dynamic and contrastive as in Track 2 — plays a crucial role in shaping the emotional pacing and storytelling function of Vietnamese advertising music.
+
+# Chroma-based and Timbre-based Self-similarity Matrices
+
+## Row 1 {data-width="350"}
+
+### Track 1
+
+```{r, chroma-based and timbre-based track 1}
+p_chroma <- "features/lesley-n-1.json" |>                           
+  compmus_chroma(norm = "euclidean") |>                   
+  compmus_self_similarity(
+    feature = pc) |>   
+  ggplot(aes(x = xtime, y = ytime, fill = d)) + 
+  geom_raster() +
+  scale_fill_viridis_c(option = "inferno", guide = "none") +             
+  labs(title = "Chroma",
+       x = "Time (s)", y = NULL, fill = NULL) +
+  theme(plot.title = element_text(size = 10, hjust = 1, face = "bold"), 
+        axis.text.y = element_text(size = 8),  
+        axis.text.x = element_text(size = 8)) +
+  theme_classic(base_size = 14) + 
+  coord_fixed()
+
+p_timbre <- "features/lesley-n-1.json" |>             
+  compmus_mfccs(norm = "identity") |>  
+  compmus_self_similarity(
+    feature = mfcc,
+    distance = "euclidean"
+  ) |>   
+  ggplot(aes(x = xtime, y = ytime, fill = d)) + 
+  geom_raster() +
+  scale_fill_viridis_c(option = "inferno", guide = "none") +
+  labs( title = "Timbre", 
+        x = "Time (s)", y = NULL, fill = NULL) +
+  theme(plot.title = element_text(size = 10, hjust = 1, face = "bold"), 
+        axis.text.y = element_text(size = 8),  
+        axis.text.x = element_text(size = 8)) +
+  theme_classic(base_size = 14) +
+  coord_fixed()
+
+p_chroma + p_timbre
+ 
+```
+
+## Row 2 {data-width="350"}
+
+### Track 2
+
+```{r, chroma-based and timbre-based track 2}
+p_chroma2 <- "features/lesley-n-2.json" |>                           
+  compmus_chroma(norm = "euclidean") |>                   
+  compmus_self_similarity(
+    feature = pc) |>   
+  ggplot(aes(x = xtime, y = ytime, fill = d)) + 
+  geom_raster() +
+  scale_fill_viridis_c(option = "inferno", guide = "none") +             
+  labs(title = "Chroma",
+       x = "Time (s)", y = NULL, fill = NULL) +
+  theme(plot.title = element_text(size = 10, hjust = 1, face = "bold"), 
+        axis.text.y = element_text(size = 8),  
+        axis.text.x = element_text(size = 8)) +
+  theme_classic(base_size = 14) + 
+  coord_fixed()
+
+p_timbre2 <- "features/lesley-n-2.json" |>             
+  compmus_mfccs(norm = "identity") |>  
+  compmus_self_similarity(
+    feature = mfcc,
+    distance = "euclidean"
+  ) |>   
+  ggplot(aes(x = xtime, y = ytime, fill = d)) + 
+  geom_raster() +
+  scale_fill_viridis_c(option = "inferno", guide = "none") +
+  labs( title = "Timbre", 
+        x = "Time (s)", y = NULL, fill = NULL) +
+  theme(plot.title = element_text(size = 10, hjust = 1, face = "bold"), 
+        axis.text.y = element_text(size = 8),  
+        axis.text.x = element_text(size = 8)) +
+  theme_classic(base_size = 14) +
+  coord_fixed()
+
+p_chroma2 + p_timbre2
+ 
+```
+
+## Row 3 {.tabset .tabset-fade data-width="300"}
+
+### Track 1
+
+**Chroma-based Self-Similarity Matrix**
+
+In the chroma-based matrix, we observe a dense distribution of small block-like patterns, indicating high internal harmonic consistency. This aligns with previous chromagram and chord analysis, which identified a folk-inspired pentatonic structure and a lack of modulation. Interestingly, there are also faint, sometimes blurred diagonal paths parallel to the main diagonal, suggesting the repetition of harmonic material at regular intervals. Although these repetitions are not sharply defined, they hint at recurring structural motifs, possibly through soft reintroductions of earlier harmonic ideas rather than exact repeats. 
+
+
+**Timbre-based Self-Similarity Matrix**
+
+The timbre matrix has softly defined block areas, especially around 70s, 100s, and 160s. TThese sections reflect homogeneity in instrumental texture at those moments, such as the inclusion of organ-like timbres and atmospheric sound effects, which were also observed in the cepstrogram. While these textural changes are present, they remain gentle and integrated, avoiding sharp contrasts.
+
+
+
+### Track 2
+
+**Chroma-based Self-Similarity Matrix**
+
+Chroma-based matrix of Track 2 reveals very clear large blocks separated by distinct changes around 60s, 110s, and 165s. These segments exhibit strong internal similarity, suggesting that each section is harmonically cohesive, while the contrast between blocks points to intentional modulation. Faint diagonal paths across the matrix imply the reappearance of harmonic motifs throughout the track, possibly repeated themes that evolve over time. 
+
+
+**Timbre-based Self-Similarity Matrix**
+
+The timbre-based matrix shows strong block segmentation — a sign of clear instrumental and textural shifts across sections. What stands out most are the lighter horizontal and vertical lines intersecting around the center (at around 110s). These bright lines indicate a drop in self-similarity at that point, highlighting a transitional moment where timbral texture noticeably changes. This could correspond to a dramatic shift in instrumentation corresponding with a solo break of drum perceived in cepstrogram, separating two major parts of the track.
+
+# Tempograms
+
+## Row 1 {.tabset .tabset-fade data-width="350"}
+
+### Track 1 - Novelty Function
+
+```{r, novelty function 1}
+
+"features/lesley-n-1.json" |>
+  compmus_spectral_novelty() |> 
+  ggplot(aes(t, novelty)) +
+  geom_line() +
+  theme_classic() +
+  theme(plot.title = element_text(size = 14, face = "bold"),
+    plot.subtitle = element_text(size = 10),
+    axis.text.y = element_text(size = 8, hjust = 1),  
+    axis.text.x = element_text(size = 8)
+  )  +
+  labs( title = "Spectral-based novelty function",
+        subtitle = "Track 1", 
+        x = "Time (s)", 
+        y = "Spectral Novelty")
+```
+
+### Track 1 - Tempogram
+
+```{r, tempogram 1}
 "features/lesley-n-1.json" |>
   compmus_tempogram(window_size = 8, hop_size = 1, cyclic = TRUE) |>
   ggplot(aes(x = time, y = bpm, fill = power)) +
@@ -636,71 +832,340 @@ my_tempogram_theme <- theme(
     y = "Tempo (BPM)"
   ) +
   theme_classic() +
-  my_tempogram_theme
+ theme(plot.title = element_text(size = 14, face = "bold"),
+    plot.subtitle = element_text(size = 10),
+    axis.text.y = element_text(size = 8, hjust = 1),  
+    axis.text.x = element_text(size = 8)
+  )
+```
+
+## Row 2 {.tabset .tabset-fade data-width="350"}
+
+### Track 2 - Novelty Function
+
+```{r, novelty function 2}
 
 "features/lesley-n-2.json" |>
-  compmus_tempogram(window_size = 8, hop_size = 1, cyclic = FALSE) |>
-  ggplot(aes(x = time, y = bpm, fill = power)) +
-  geom_raster() +
-  scale_fill_viridis_c(guide = "none") +
-  labs(
-    title = "Fourier-based tempogram (non-cyclic)",
-    subtitle = "Track 2", 
-    x = "Time (s)", 
-    y = "Tempo (BPM)"
-  ) +
+  compmus_spectral_novelty() |> 
+  ggplot(aes(t, novelty)) +
+  geom_line() +
   theme_classic() +
-  my_tempogram_theme
+ theme(plot.title = element_text(size = 14, face = "bold"),
+    plot.subtitle = element_text(size = 10),
+    axis.text.y = element_text(size = 8, hjust = 1),  
+    axis.text.x = element_text(size = 8)
+  ) +
+  labs( title = "Spectral-based novelty function",
+        subtitle = "Track 2", 
+        x = "Time (s)", 
+        y = "Spectral Novelty")
+```
 
+### Track 2 - Tempogram
+
+```{r, tempogram 2}
 "features/lesley-n-2.json" |>
   compmus_tempogram(window_size = 8, hop_size = 1, cyclic = TRUE) |>
   ggplot(aes(x = time, y = bpm, fill = power)) +
   geom_raster() +
   scale_fill_viridis_c(guide = "none") +
-  labs(
-    title = "Cyclic tempogram",
-    subtitle = "Track 2", 
+  theme_classic() +
+ theme(plot.title = element_text(size = 14, face = "bold"),
+    plot.subtitle = element_text(size = 10),
+    axis.text.y = element_text(size = 8, hjust = 1),  
+    axis.text.x = element_text(size = 8)
+  ) +
+   labs(title = "Cyclic tempogram", 
+       subtitle = "Track 2", 
     x = "Time (s)", 
     y = "Tempo (BPM)"
-  ) +
-  theme_classic() +
-  my_tempogram_theme
+  ) 
 
 ```
 
-***
+## Row 3 {.tabset .tabset-fade data-width="300"}
+
+### Novelty Function 
+
+***Track 1***
+
+The spectral-based novelty function for Track 1 reflects a textural landscape that is smooth yet gently evolving. While there are no sharp or dramatic peaks, the function displays frequent moderate fluctuations, indicating a continuous stream of timbral and structural changes without disruption. Novelty values mostly stay under 0.20, with clusters of slightly elevated peaks around 10s, 40s, 110s–125s, and 140s. This corresponds closely with the timbral shifts and sectional transitions previously observed in the cepstrogram and timbre-based self-similarity matrix with instrumental layering, transitional sound effects. 
+
+
+***Track 2***
+
+In contrast, the spectral novelty function of Track 2 reveals a highly segmented and event-driven structure, with three clear peaks marking significant moments in the track: at the very beginning, at 110s, and near the end (around 200s). These peaks indicate sharp spectral changes, often associated with transitions between major sections or the introduction of contrasting timbral material. The initial peak corresponds with the entrance of strong percussion, setting the tone and energy for the opening of piece. The central peak at 110s aligns with the solo drum break observed in both the cepstrogram and self-similarity matrices, which serves as a structural turning point that divides the track into two contrasting halves. Finally, the late peak around 200s marks a final transition, closing the piece with a shift in musical direction. 
+
+Overall, Vietnamese advertising music often balances textural stability with sectional contrast, using spectral shifts to shape emotional flow and align with the pacing of visual narratives.
+
+
+### Tempogram
+
+***Track 1***
+
+The cyclic tempogram of Track 1 reveals a strong sense of tempo stability centered around 118 BPM. Interestingly, the track begins with a slightly slower tempo (around 90 BPM), gradually accelerating and then stabilizing near 118 BPM. Toward the end of the piece (from ~190s onward), there is a slight deceleration, suggesting a structural cue for closure. These slight tempo modulations contribute to a musical contour that reinforces formal structure, subtly marking the entrance, development, and resolution of the track. 
+
+***Track 2***
+
+The cyclic tempogram of Track 2 clearly reveals a stable fundamental tempo centered around 100 BPM. Meanwhile, the fainter line around 140 BPM likely corresponds to a tempo-related harmonic, reflecting rhythmic embellishments such as faster decorative percussion.  Notably, the tempogram also displays a series of recurring vertical light lines at specific time points — particularly around 5s, 40s, 110s, and 140s. s. These indicate localised changes in beat salience and transient rhythmic disruptions, corresponding to musical transitions that can also be perceived aurally.
+
+Based on this tempogram analysis of these tracks, Vietnamese advertising background music appears characterized by clear, stable fundamental tempo structures, often accompanied by identifiable harmonic patterns. The rhythmic consistency observed suggests suitability for creating comfortable listening experiences while viewing nature and culture presented in video, essential in promotional contexts. While there are still visible changes presented in tempograms at certain time-points, these are not such huge changes and these changes seem to be mainly due to the changes in instrumentation when carefully listening to the tracks. 
+
+
+# Hierarchical clustering
+
+## Row 1 {.tabset .tabset-fade data-width="700"}
+
+### Dendrogram
+
+```{r}
+highlight_tracks <- c("lesley-n-1", "lesley-n-2")
+
+cluster_juice1 <-
+  recipe(
+    filename ~ arousal + 
+      valence +
+      instrumentalness + tempo,
+    data = compmus2025
+  ) |>
+  step_center(all_predictors()) |>
+  step_scale(all_predictors()) |> 
+  # step_range(all_predictors()) |> 
+  prep(compmus2025) |>
+  juice() |>
+  column_to_rownames("filename")
+
+compmus_dist <- dist(cluster_juice1, method = "euclidean")
+
+hc <- hclust(dist(cluster_juice1), method = "average")
+
+ddata <- dendro_data(hc)
+
+ggdendrogram(ddata, rotate = FALSE, size = 2, theme_dendro = TRUE) +
+  theme(
+    plot.title = element_text(face = "bold", size = 12),
+    axis.text.x = element_text(
+      angle = 90,
+      vjust = 0.5,
+      hjust = 1,
+      size = 4,
+      color = ifelse(ddata$labels$label %in% highlight_tracks, "deeppink", "black")
+    ),
+    axis.text.y = element_text(size = 8)
+  ) +
+  labs(title = "Dendrogram with Arousal, Valence, Instrumentalness, and Tempo")
+```
+
+### Heatmap
+
+```{r}
+cut_height_1 <- 1.5
+cluster_cut_1 <- cutree(hc, h = cut_height_1)
+cluster_id_1 <- cluster_cut_1["lesley-n-1"]
+subset_names_1 <- names(cluster_cut_1[cluster_cut_1 == cluster_id_1])
+subset_data_1 <- cluster_juice1[subset_names_1, ]
+row_colors_1 <- ifelse(rownames(subset_data_1) == "lesley-n-1", "deeppink", "black")
+heatmap1 <- heatmaply(
+  subset_data_1,
+  hclustfun = hclust,
+  hclust_method = "average",
+  dist_method = "euclidean",
+  labRow = rownames(subset_data_1),
+  row_text_color = row_colors_1,
+  main = "Cluster near lesley-n-1",
+  main_font_size = 10,
+  fontsize_row = 8,
+  fontsize_col = 8,
+  colors = viridisLite::viridis(256)
+)
+
+cut_height_2 <- 1.5
+cluster_cut_2 <- cutree(hc, h = cut_height_2)
+cluster_id_2 <- cluster_cut_2["lesley-n-2"]
+subset_names_2 <- names(cluster_cut_2[cluster_cut_2 == cluster_id_2])
+subset_data_2 <- cluster_juice1[subset_names_2, ]
+row_colors_2 <- ifelse(rownames(subset_data_2) == "lesley-n-2", "deeppink", "black")
+heatmap2 <- heatmaply(
+  subset_data_2,
+  hclustfun = hclust,
+  hclust_method = "average",
+  dist_method = "euclidean",
+  labRow = rownames(subset_data_2),
+  row_text_color = row_colors_2,
+  main = "Cluster near lesley-n-2",
+  main_font_size = 10,
+  fontsize_row = 8,
+  fontsize_col = 8,
+  colors = viridisLite::viridis(256)
+)
+
+browsable(
+  div(style = "max-height: 700px; overflow-y: auto;",
+    tagList(heatmap1, br(), heatmap2)
+  )
+)
+
+```
+
+
+## Row 2 {.tabset .tabset-fade data-width="300"}
+
+### Dendrogram 
+
+The dendrogram visually represents how similar or different tracks are based on musical-emotional features: tempo, arousal, valence and instrumentalness. 
+
+**About the class corpus:**
+
+In the upper layers of the dendrogram (levels 1, 2, and 3), there is a noticeable leftward asymmetry, where a number of tracks branch off earlier and do not merge with the larger group until much later. This left-leaning structure suggests that several tracks — particularly those on the far left — are distinct from the general musical tendencies of the class corpus. These tracks likely deviate more strongly in one or more features such as tempo, arousal, valence, or instrumentalness. 
+
+For example, tracks such as berend-b-2, aleksandra-b-1, and reinout-w-2 appear on the outermost left branch. These compositions exhibit qualities typical of high-energy genres like EDM and disco, characterized by electronic timbres, strong rhythmic drive, high arousal, and fast tempos. Their early separation from the rest of the corpus reflects their greater dissimilarity in both emotional tone and production style.
+
+This assymmetrical structure overall highlights the diversity of class corpus. 
+
+
+**About my tracks:**
+Both of my tracks are located within one of the large central clusters at level 4, alongside many other tracks in the class corpus. However, when examining the deeper levels of the dendrogram, the two tracks diverge significantly — each falling into different lower-level subclusters, indicating distinct musical-emotional profiles.
+
+- **lesley-n-1** appears on the far right of the dendrogram and is clustered with tracks like  wednesday-w-2, desmond-l-1, daniel-p-1, sanne-o-2, and ties-o-1/2. 
+
+- **lesley-n-2**,  by contrast, is situated in the middle-left region and grouped with more dynamic and segmented tracks like bram-d-1, daniel-p-2, and sarya-n-2. 
+
+This separation supports earlier analytical findings that, while both tracks are suitable for Vietnamese advertising, they represent distinct stylistic features.  
+
+### Heatmap
+
+These heatmaps specifically isolate the two clusters of neighboring tracks closest to my selected tracks. Each subcluster is characterized by different relationships among the four features. 
+
+
 **Track 1**
 
-**- Fourier-based tempogram:**
+When listening to the other track neighbour and comparing it to my first track (lesley-n-1), I initially noticed very little similarity — if any at all. Those feel more electronic in nature, with a higher perceived arousal level and fewer acoustic elements. In contrast, my own track is rich in instrumental textures, prominently featuring Vietnamese zither, drums, and other traditional folk instruments. Based on this, I expected a clear difference in instrumentalness. However, the heatmap reveals a surprising result: both my track and its cluster neighbors share relatively similar and unexpectedly low z-scored instrumentalness values, with my track displaying one of the lowest scores in the cluster.
 
-+ Prominent, stable horizontal lines appear consistently at multiple tempo levels (~120 BPM, 240 BPM, 360 BPM, etc.), clearly indicating a fundamental tempo around 120 BPM, with additional lines representing tempo octaves 
-
-+ The rhythmic structure is highly repetitive and steady, reflecting a clear rhythmic pattern throughout the duration of the track
-
-+ Minimal tempo variation occurs, with slight exceptions at the opening (0–5s) and the ending section (around 190s onward), implying strong rhythmic stability. I guess that these variations subtly highlight a structured musical form, including an introduction, main body, and conclusion 
-
-**- Cyclic tempogram:** A simplified visualization by wrapping higher harmonics back into the fundamental range
-
-+ Clearly highlights a stable fundamental tempo around 118 BPM (near 120 BPM as estimated in non-cyclic tempogram)
-
-+ Noticeable gradual tempo modulations occur, with the tempo starting slower (approximately 90 BPM) and gradually increasing at the beginning, and slightly decreasing towards the end (around 115 BPM)
-
+This raises an important question: Can current music information retrieval systems accurately detect and interpret non-Western traditional instruments? The fact that my track — which is clearly instrumental to the human ear — scores low in instrumentalness suggests that models trained primarily on Western music datasets may fail to recognize or appropriately weight traditional Vietnamese timbres.
 
 **Track 2**
 
-**- Fourier-based tempogram:**
+When listening to bram-d-1, daniel-p-2, and sarya-n-2 and comparing with mine, I noticed that all four share a similar genre and mood — lightweight, atmospheric tracks that resemble background or ambient music, seem to be used in cinematic or commercial settings. The heatmap confirms this sonic similarity: these tracks all exhibit very high levels of instrumentalness, suggesting a focus on instrumental textures. In contrast, they share consistently low — even negative — values for tempo, valence, and arousal, meaning they are slower, more emotionally neutral or subdued, and less intense in terms of energetic expression.
 
-+ Presents similarly strong, stable horizontal lines but around multiple tempo levels (~100 BPM, 200 BPM, 300 BPM, etc.)
 
-+ However, unlike Track 1, this track shows short and subtle rhythmic interruptions around certain moments (around 5s, 40s, 110s, 140s, etc)
 
-**- Cyclic tempogram:**
+# Classification
 
-+ Clearly isolates the main fundamental tempo around 100 BPM
+## Row 1 {.tabset .tabset-fade data-width="350"}
 
-+ Clearer reveal rhythmic variations (seen as vertical lighter lines at multiple time-points) which suggests beat strength's changes and presents brief musical transitions aligning with what is found when listening the track
+### k-Nearest Neighbour Result
 
--> Based solely on the tempogram analysis of these tracks, Vietnamese advertising background music appears characterized by clear, stable fundamental tempo structures, often accompanied by identifiable harmonic patterns. The rhythmic consistency observed suggests suitability for creating comfortable listening experiences while viewing nature and culture presented in video, essential in promotional contexts. While there are still visible 
-changes presented in tempograms at certain time-points, these are not such huge changes and these changes seem to be mainly due to the changes in instrumentation when carefully listening to the tracks
+```{r, k-Nearest Neighbour}
+compmus2025_filtered <- 
+  compmus2025 |> filter(!is.na(ai)) |> 
+  mutate(ai = factor(if_else(ai, "AI", "Non-AI")))
 
-(I still don't know how to change the code in order to make all graphs have the same size, if you know, please help meeee! thank you in advance!)
+classification_recipe <-
+  recipe(
+    ai ~
+      arousal +
+      danceability +
+      instrumentalness +
+      tempo +
+      valence,
+    data = compmus2025_filtered
+  ) |>
+  step_center(all_predictors()) |>
+  step_scale(all_predictors())      # Converts to z-scores.
+  # step_range(all_predictors())    # Sets range to [0, 1].
+
+compmus_cv <- compmus2025_filtered |> vfold_cv(5)
+
+knn_model <-
+  nearest_neighbor(neighbors = 1) |>
+  set_mode("classification") |> 
+  set_engine("kknn")
+classification_knn <- 
+  workflow() |> 
+  add_recipe(classification_recipe) |> 
+  add_model(knn_model) |> 
+  fit_resamples(compmus_cv, control = control_resamples(save_pred = TRUE))
+classification_knn |> get_pr()
+```
+
+### Mosaic
+```{r, Mosaic}
+classification_knn |> get_conf_mat() |> autoplot(type = "mosaic")
+```
+
+### Heatmap
+```{r, Heatmap}
+classification_knn |> get_conf_mat() |> autoplot(type = "heatmap")
+```
+
+
+## Row 2 {.tabset .tabset-fade data-width="350"}
+
+### Random Forest Result
+```{r, random forest}
+forest_model <-
+  rand_forest() |>
+  set_mode("classification") |> 
+  set_engine("ranger", importance = "impurity")
+indie_forest <- 
+  workflow() |> 
+  add_recipe(classification_recipe) |> 
+  add_model(forest_model) |> 
+  fit_resamples(
+    compmus_cv, 
+    control = control_resamples(save_pred = TRUE)
+  )
+indie_forest |> get_pr()
+```
+
+### Importance Variables
+```{r, Importance Variables}
+workflow() |> 
+  add_recipe(classification_recipe) |> 
+  add_model(forest_model) |> 
+  fit(compmus2025_filtered) |> 
+  pluck("fit", "fit", "fit") |>
+  ranger::importance() |> 
+  enframe() |> 
+  mutate(name = fct_reorder(name, value)) |> 
+  ggplot(aes(name, value)) + 
+  geom_col() + 
+  coord_flip() +
+  theme_classic() +
+  labs(x = NULL, y = "Importance")
+```
+
+### AI vs non-AI 
+
+```{r, AI vs non-AI}
+compmus2025_filtered |>
+  ggplot(aes(x = instrumentalness, y = danceability, colour = ai, size = arousal)) +
+  geom_point(alpha = 0.8) +
+  scale_color_viridis_d() +
+  theme_classic() +
+  labs(
+    x = "Instrumentalness",
+    y = "Danceability",
+    size = "Arousal",
+    colour = "AI"
+  )
+```
+
+## Row 3 {data-width="300"}
+
+### Description
+I examined two classification methods to distinguish between AI and non-AI generated tracks in the class corpus: k-Nearest Neighbour and Random Forest, both using all available features. The results show that Random Forest performs slightly better, achieving a precision of 0.688, compared to 0.66 for k-Nearest Neighbour.
+
+Using the Random Forest model, the three most important features for classification were instrumentalness, arousal, and danceability. A scatter plot based on these features reveals substantial overlap between AI and non-AI tracks, indicating that the two categories are not easily separable. However, a general trend emerges: AI-generated tracks (purple) tend to cluster around lower to mid values of instrumentalness and danceability, whereas non-AI tracks (yellow) are more widely distributed, including those with higher values in both dimensions. This suggests that, in the class corpus, AI-generated music tends to be less instrumental and rhythmically engaging, potentially reflecting limitations in expressive complexity compared to human-generated music.
+
+
+# Conclusion
+
+This portfolio has explored the musical and structural features of Vietnamese advertising music through a detailed analysis of two selected tracks. Despite representing different stylistic directions — one grounded and harmonically static, the other dynamic and segmentally expressive — both tracks share key traits that reflect broader tendencies in Vietnamese promotional media.
+
+Across all dimensions analyzed — harmonic structure, key modulation, timbre, novelty, and tempo — Vietnamese advertising music appears to favor coherence, cultural resonance, and emotional subtlety. Tonal centers remain stable, tempo is consistent, and timbral shifts are used thoughtfully to support transitions and narrative development. This aligns well with the function of background music in advertising: to support visual storytelling without overwhelming it, while still evoking emotional and cultural depth.
+
+Altogether, this analysis suggests that Vietnamese advertising music balances stability and variation, local identity and global accessibility, crafting sonic experiences that reinforce the beauty, rhythm, and emotion of Vietnam’s visual storytelling.
+
+Thank you for reading my portfolio!
+
